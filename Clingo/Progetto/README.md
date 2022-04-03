@@ -1,6 +1,8 @@
-Si richiede l’utilizzo del paradigma ASP (Answer Set Programming) per la
-generazione con clingo del calendario di una competizione sportiva, in particolare
-di un campionato avente le seguenti caratteristiche:
+# Progetto d’esame per la parte ASP
+
+> Si richiede l’utilizzo del paradigma ASP (Answer Set Programming) per la
+> generazione con clingo del calendario di una competizione sportiva, in particolare
+> di un campionato avente le seguenti caratteristiche:
 - sono iscritte 20 squadre;
 - il campionato prevede 38 giornate, 19 di andata e 19 di ritorno NON
 simmetriche, ossia la giornata 1 di ritorno non coincide necessariamente con la
