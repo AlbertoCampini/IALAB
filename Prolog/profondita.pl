@@ -1,15 +1,58 @@
 % cerca_soluzione(-ListaAzioni)
 cerca_soluzione(ListaAzioni):-
     iniziale(SIniziale),
-    profondita(SIniziale,ListaAzioni,[]).
+    checkpoints(Checkpoints).
+    profondita(SIniziale,ListaAzioni,[],Checkpoints).
 
 % profondita(S,ListaAzioni,Visitati)
-profondita(S,[],_):-finale(S),!.
-profondita(S,[Az|ListaAzioni],Visitati):-
+profondita(S,[],_,Checkpoints):-finale(Checkpoints),!.
+
+
+profondita(S,[Az|ListaAzioni],Visitati,Checkpoints):-
     applicabile(Az,S),
     trasforma(Az,S,SNuovo),
     \+member(SNuovo,Visitati),
-    profondita(SNuovo,ListaAzioni,[S|Visitati]).
+    member(SNuovo,Checkpoints),
+    delete(SNuovo,Checkpoints,NewCheckPoints),
+    profondita(SNuovo,ListaAzioni,[S|Visitati],NewCheckPoints).
+
+profondita(S,[Az|ListaAzioni],Visitati,Checkpoints):-
+    applicabile(Az,S),
+    trasforma(Az,S,SNuovo),
+    \+member(SNuovo,Visitati),
+    \+member(SNuovo,Checkpoints),
+    profondita(SNuovo,ListaAzioni,[S|Visitati],Checkpoints).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 % cerca_soluzione_soglia(-ListaAzioni,+Soglia)
 cerca_soluzione_soglia(ListaAzioni,Soglia):-

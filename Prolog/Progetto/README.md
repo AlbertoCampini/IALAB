@@ -16,3 +16,9 @@ goal;
 - un file ricerca.pl contenente l’implementazione della strategia di ricerca con un
 predicato prova/1 il cui argomento corrisponda ad un termine di output con il
 risultato, ossia abbia il formato prova(+ListaAzioni). 
+
+# Idea Progetto
+
+ >Creare un labirinto chiuso con diversi checkpoint che devono essere raggiunti in ordine
+ >All'interno del labirinto troviamo 3 tipologie di elementi : Caselle vuote, Muri, Goal.
+ >I movimenti possibili sono N,S,E,O,NE,NO,SE,SO
