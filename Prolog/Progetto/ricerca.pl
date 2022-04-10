@@ -54,7 +54,7 @@ closestCheckPoint(S,[pos(Riga,Colonna)|Tail],RealMin,RealMinDistance):-
 
 findMin(_,ActualMin,pos(MinRiga,MinColonna),[],pos(RealMinRiga,RealMinColonna),RealMinDistance):-RealMinRiga is MinRiga, RealMinColonna is MinColonna,RealMinDistance is ActualMin.
 
-%findMin(Posizione attuale, Distanza minima della ricerca, Checkpoint con distanza minima della ricerca, Lista Checkpoints ancora da esplorare)
+%findMin(Posizione attuale, Distanza minima della ricerca, Checkpoint con distanza minima della ricerca, Lista Checkpoints ancora da esplorare, Variabile per salvare output, Variabile per dalvare output)
 findMin(S,ActualMinDistance,ActualMinCheckPoint,[Head|Tail],RealMin,RealMinDistance):-
     distance(S,Head,Distance),
     updateMin(ActualMinDistance,ActualMinCheckPoint,Distance,Head,NewMin,NewCheckPoint),
@@ -66,17 +66,17 @@ distance(pos(Riga,Colonna),pos(RigaTarget,ColonnaTarget),Distance):-
      DistanceRighe is Riga - RigaTarget,
      absolute(DistanceRighe,DistanceRigheAbs),
      DistanceColonne is Colonna - ColonnaTarget,
-     absolute(DistanceColonne,DistanceColonneAbs),       %ManHattan
+     absolute(DistanceColonne,DistanceColonneAbs),                      %ManHattan
      DistanceRigheAbs>DistanceColonneAbs,
-     Distance is DistanceRigheAbs.                             %Using diagonal movement
+     Distance is DistanceRigheAbs.                                      %Using diagonal movement
 
     distance(pos(Riga,Colonna),pos(RigaTarget,ColonnaTarget),Distance):-
         DistanceRighe is Riga - RigaTarget,
      absolute(DistanceRighe,DistanceRigheAbs),
      DistanceColonne is Colonna - ColonnaTarget,
-     absolute(DistanceColonne,DistanceColonneAbs),       %ManHattan
+     absolute(DistanceColonne,DistanceColonneAbs),                      %ManHattan
      DistanceRigheAbs@=<DistanceColonneAbs,
-     Distance is DistanceColonneAbs.                                 %Using diagonal movement
+     Distance is DistanceColonneAbs.                                    %Using diagonal movement
 
 
 updateMin(ActualMinDistance,_,Distance,pos(ActualElementRiga,ActualElementColonna),NewMin,pos(NewCheckPointRiga,NewCheckpointColonna)):-
