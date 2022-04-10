@@ -24,6 +24,7 @@ risultato, ossia abbia il formato prova(+ListaAzioni).
   - **Caselle vuote**: tutte le caselle in cui è possibile effettuare una mossa
   - **Muri**: le zone delimitate della mappa, il giocatore non ci può passare attraverso, è indicato con `occupata(pos(R,C))`
   - **Checkpoit**: le zone che definiamo i goal nella mappa, cioè quelli da raggiungere, è indicato con `checkpoints([pos(R,C)+])`.
+ 
  I movimenti possibili del giocatore sono:
   - Nord
   - Sud
