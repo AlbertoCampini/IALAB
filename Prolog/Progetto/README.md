@@ -9,16 +9,30 @@
 >stati. In linea con quanto visto a lezione, è richiesto che il sistema sia composto da
 >almeno tre file:
 
-- un file regole.pl contenente le definizioni dei predicati trasforma/3 e applicabile/
-2;
-- un file dominio.pl contenete i fatti che descrivono il dominio, lo stato iniziale e i
-goal;
+- un file regole.pl contenente le definizioni dei predicati trasforma/3 e applicabile/2;
+- un file dominio.pl contenete i fatti che descrivono il dominio, lo stato iniziale e i goal;
 - un file ricerca.pl contenente l’implementazione della strategia di ricerca con un
 predicato prova/1 il cui argomento corrisponda ad un termine di output con il
 risultato, ossia abbia il formato prova(+ListaAzioni). 
 
 # Idea Progetto
 
- >Creare un labirinto chiuso con diversi checkpoint che devono essere raggiunti in ordine
- >All'interno del labirinto troviamo 3 tipologie di elementi : Caselle vuote, Muri, Goal.
- >I movimenti possibili sono N,S,E,O,NE,NO,SE,SO
+ >Utilizzare come dominio di gioco una mappa chiusa e limitata da `num_righe`, `num_col` nella quale sono posizionati diversi checkpoint che devono essere raggiunti dal giocatore con un ordine non rilevante.
+
+ All'interno del labirinto troviamo le seguenti tipologie di elementi : 
+  - **Stato iniziale**: Il punto in cui il "giocatore" inizierà la sua partita, è indicato con `iniziale(pos(R,C))`
+  - **Caselle vuote**: tutte le caselle in cui è possibile effettuare una mossa
+  - **Muri**: le zone delimitate della mappa, il giocatore non ci può passare attraverso, è indicato con `occupata(pos(R,C))`
+  - **Checkpoit**: le zone che definiamo i goal nella mappa, cioè quelli da raggiungere, è indicato con `checkpoints([pos(R,C)+])`.
+ 
+ I movimenti possibili del giocatore sono:
+  - Nord
+  - Sud
+  - Est
+  - Ovest
+  - Nord Est
+  - Nord Ovest
+  - Sud Est
+  - Sud Ovest
+
+## Strategie implementate
