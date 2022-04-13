@@ -1,0 +1,38 @@
+body{
+    margin: 0;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+.top__bar{
+    width: 100vw;
+    height: 60px;
+    border-bottom: 1px solid #c7c7c7;
+}
+.buttonClass{
+    border-radius:0;
+    background-color:white;
+    border-color:#c7c7c7;
+    border-width:1px;
+   } 
+.buttonClassNoHover{
+    border-radius:0;
+    background-color:white;
+    border-color:#c7c7c7;
+    border-width:1px
+   }  
+.buttonClass:hover{
+      cursor: pointer;
+  } 
+
+.game__container{
+    min-width: 70%;
+    min-height: 100%; 
+    text-align: center;
+}
+
+.output__container{
+    min-width: 30%; 
+    height: 100%;
+    text-align: center;
+}
+
