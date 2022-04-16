@@ -1,0 +1,34 @@
+(deftemplate human
+    (slot gender)
+    (slot name)
+    (multislot children)
+)
+
+(deftemplate ancestor
+    (slot anc)
+    (slot des)
+)
+
+(deftemplate parent
+    (slot par)
+    (slot cld)
+)
+
+(deftemplate mother ... father)
+
+(defrule ancestor-1
+    (parent (par ?x) (cld ?y))
+=>
+    (assert (ancestor (anc ?x) (des ?y)))
+)
+
+(defrule ancestor-2
+    (parent (par ?x) (cld ?z))
+    (ancestor (anc ?z) (des ?y))
+=>
+    (assert (ancestor (anc ?x) (des ?y)))
+)
+
+(deffacts 
+    (human (name Luigi) (gender male) (children Marta Luca))
+)
