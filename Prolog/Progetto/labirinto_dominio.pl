@@ -1,0 +1,15 @@
+num_col(10). 
+num_righe(10).
+finale([]).
+iniziale(pos(2,2)).
+occupata(pos(2,3)).
+occupata(pos(4,3)).
+occupata(pos(4,4)).
+occupata(pos(4,5)).
+occupata(pos(4,6)).
+occupata(pos(4,7)).
+occupata(pos(5,7)).
+occupata(pos(5,8)).
+occupata(pos(5,9)).
+occupata(pos(5,10)).
+checkpoints([pos(2,9),pos(9,9),pos(7,2)]).
