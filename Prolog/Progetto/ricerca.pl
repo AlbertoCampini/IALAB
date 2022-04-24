@@ -34,7 +34,6 @@ profondita_informed(S,[AzioneMigliore|ListaAzioni],Visitati,Checkpoints):-
     closestCheckPoint(S,Checkpoints,ChoosenCheckpoint,_),                                   %cerco il target più vicino
     findall(Az,applicabile(Az,S),ListaAzioniApplicabili),                                   %cerco tutte le azioni applicabili nello stato attuale
     merge_sort(ListaAzioniApplicabili,ListaAzioniOrdinate,S,ChoosenCheckpoint),             %valuto le azioni possibili scegliendo quella che minimizza la distanza verso il checkpoint piu vicino 
-    write(ListaAzioniOrdinate),write('\n'),
     member(AzioneMigliore,ListaAzioniOrdinate),
     trasforma(AzioneMigliore,S,SNuovo),
     \+member(SNuovo,Visitati),
@@ -43,6 +42,67 @@ profondita_informed(S,[AzioneMigliore|ListaAzioni],Visitati,Checkpoints):-
 
 
 
+% cerca_soluzione_informed2(-ListaAzioni)
+cerca_soluzione_informed2(ListaAzioni):-
+    iniziale(SIniziale),
+    checkpoints(Checkpoints),
+    profondita_informed2(SIniziale,ListaAzioni,[],Checkpoints).
+
+% profondita_informed(S,ListaAzioni,Visitati)
+profondita_informed2(_,[],_,Checkpoints):-finale(Checkpoints).
+profondita_informed2(_,[],_,Checkpoints,_):-finale(Checkpoints).
+
+
+profondita_informed2(S,[AzioneScelta|ListaAzioni],Visitati,Checkpoints):-
+    closestCheckPoint(S,Checkpoints,ChoosenCheckpoint,_),                                   %cerco il target più vicino
+    findall(Az,trasforma(Az,pos(0,0),_),ListaAzioniApplicabili),                           %cerco tutte le azioni 
+    merge_sort(ListaAzioniApplicabili,[AzioneMigliore|_],S,ChoosenCheckpoint),             %valuto le azioni scegliendo quella che minimizza la distanza verso il checkpoint piu vicino 
+    generateOrderedActions(AzioneMigliore,OrderedActions),                                  %genero una lista di azioni applicabili in base alla azione migliore
+    %print(OrderedActions),print('\n'),
+    member(AzioneScelta,OrderedActions),
+    applicabile(AzioneScelta,S),
+    trasforma(AzioneScelta,S,SNuovo),
+    \+member(SNuovo,Visitati),
+    AzioneScelta==AzioneMigliore,
+    update_checkpoints_and_visited(SNuovo,Checkpoints,NewCheckPoints,Visitati,NewVisitati),
+    profondita_informed2(SNuovo,ListaAzioni,NewVisitati,NewCheckPoints).
+
+profondita_informed2(S,[AzioneScelta|ListaAzioni],Visitati,Checkpoints):-
+    closestCheckPoint(S,Checkpoints,ChoosenCheckpoint,_),                                   %cerco il target più vicino
+    findall(Az,trasforma(Az,pos(0,0),_),ListaAzioniApplicabili),                           %cerco tutte le azioni 
+    merge_sort(ListaAzioniApplicabili,[AzioneMigliore|_],S,ChoosenCheckpoint),             %valuto le azioni scegliendo quella che minimizza la distanza verso il checkpoint piu vicino 
+    generateOrderedActions(AzioneMigliore,OrderedActions),                                  %genero una lista di azioni applicabili in base alla azione migliore
+    %print(OrderedActions),print('\n'),
+    member(AzioneScelta,OrderedActions),
+    applicabile(AzioneScelta,S),
+    trasforma(AzioneScelta,S,SNuovo),
+    \+member(SNuovo,Visitati),
+    AzioneScelta\=AzioneMigliore,
+    update_checkpoints_and_visited(SNuovo,Checkpoints,NewCheckPoints,Visitati,NewVisitati),
+    profondita_informed2(SNuovo,ListaAzioni,NewVisitati,NewCheckPoints,AzioneMigliore).
+
+
+profondita_informed2(S,[AzioneScelta|ListaAzioni],Visitati,Checkpoints,Direction):-
+    generateOrderedActions(Direction,OrderedActions),                                  %genero una lista di azioni applicabili in base alla azione migliore
+    %print(OrderedActions),print('\n'),
+    member(AzioneScelta,OrderedActions),
+    applicabile(AzioneScelta,S),
+    trasforma(AzioneScelta,S,SNuovo),
+    \+member(SNuovo,Visitati),
+    AzioneScelta==Direction,
+    update_checkpoints_and_visited(SNuovo,Checkpoints,NewCheckPoints,Visitati,NewVisitati),
+    profondita_informed2(SNuovo,ListaAzioni,NewVisitati,NewCheckPoints).
+
+profondita_informed2(S,[AzioneScelta|ListaAzioni],Visitati,Checkpoints,Direction):-
+    generateOrderedActions(Direction,OrderedActions),                                  %genero una lista di azioni applicabili in base alla azione migliore
+    %print(OrderedActions),print('\n'),
+    member(AzioneScelta,OrderedActions),
+    applicabile(AzioneScelta,S),
+    trasforma(AzioneScelta,S,SNuovo),
+    \+member(SNuovo,Visitati),
+    AzioneScelta\=Direction,
+    update_checkpoints_and_visited(SNuovo,Checkpoints,NewCheckPoints,Visitati,NewVisitati),
+    profondita_informed2(SNuovo,ListaAzioni,NewVisitati,NewCheckPoints,Direction).
 
 %Utils
 
@@ -150,6 +210,22 @@ update_checkpoints(S,Checkpoints,NewCheckPoints):-
 update_checkpoints(S,Checkpoints,Checkpoints):-
     \+member(S,Checkpoints).
 
+% update_checkpoints_and_visited(-S,-CheckPoints,+NewCheckPoints) 
+update_checkpoints_and_visited(S,Checkpoints,NewCheckPoints,_,[S]):-
+    member(S,Checkpoints),
+    delete(Checkpoints,S,NewCheckPoints).
+update_checkpoints_and_visited(S,Checkpoints,Checkpoints,Visited,[S|Visited]):-
+    \+member(S,Checkpoints).
+
+%generateOrderedActions (-BestAction,Actions)
+generateOrderedActions(sud,[sud,sudEst,sudOvest,est,ovest,nordEst,nordOvest,nord]).
+generateOrderedActions(sudEst,[sudEst,sud,est,ovest,nord,nordEst,sudOvest,nordOvest]).
+generateOrderedActions(sudOvest,[sudOvest,sud,ovest,est,nord,nordOvest,sudEst,nordEst]).
+generateOrderedActions(est,[est,nordEst,sudEst,sud,nord,ovest,nordOvest,sudOvest]).
+generateOrderedActions(ovest,[ovest,nordOvest,sudOvest,sud,nord,est,nordEst,sudEst]).
+generateOrderedActions(nord,[nord,nordEst,nordOvest,est,ovest,sudEst,sudOvest,sud]).
+generateOrderedActions(nordEst,[nordEst,nord,est,ovest,sud,sudEst,nordOvest,sudOvest]).
+generateOrderedActions(nordOvest,[nordOvest,nord,ovest,est,sud,sudOvest,nordEst,sudEst]).
 
 
 
