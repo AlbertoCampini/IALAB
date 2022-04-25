@@ -1,0 +1,130 @@
+<html>
+    <head>
+   
+        <link rel="stylesheet" href="style.css">
+    </head>
+    
+    <body>
+        <div class="top__bar">
+
+        </div>
+        <div style="height: 100vh; width: 100%; text-align: center;">
+            <h1>Campionato calcistico</h1>
+            <div style="width: 100%;" id="matches">
+
+            </div>
+        </div>
+    
+        <script>
+            var output = null;
+            var matches=[];
+            colours=['#fcba03','#fc8c03','#fc4e03','#fc1403','#f0fc03','#7bfc03','#03fc84','#03fce3','#03e7fc','#03a5fc','#033dfc','#8403fc','#c203fc','#fc03b1','#fc035a','#646949','#000000','#484863','#1d4012','#ad5b28'];
+            window.onload = function() {
+                output=prompt("Per favore inserisci l'output di clingo");
+                output=output.split(" ");
+                for(let i=0;i<output.length;i++){
+                    let match = {};
+                    output[i]=output[i].replace("assegnaMatch(match(","");
+                    match.homeTeam=parseInt(output[i].split(',')[0]);
+                    output[i]=output[i].split(',');
+                    match.ospiteTeam=parseInt(output[i][1].replace(")",""));
+                    output[i]=output[i][2].replace("giornata(","");
+                    match.day=parseInt(output[i].replace("))",""));
+                    matches.push(match);
+                }
+                matches.sort((a,b) => (a.day > b.day) ? 1 : ((b.day > a.day) ? -1 : 0))
+                let giornata=0;
+                let outputHtml="";
+                for(let i=0;i<matches.length;i++){
+                    if(giornata!=matches[i].day){
+                        outputHtml+="<h2> Giornata: "+matches[i].day+" </h2>\n";
+                        giornata=matches[i].day;
+                    }
+                    outputHtml+="<h3> <b style='color:"+colours[matches[i].homeTeam]+"'>Team "+matches[i].homeTeam+"</b>               VS                  <b style='color:"+colours[matches[i].ospiteTeam]+"'>Team "+matches[i].ospiteTeam+"</b>";
+                }
+                document.getElementById('matches').innerHTML = outputHtml;
+
+                //Controllo vincoli:
+                //Ogni squadra si affronta due volte, una andata e una ritorno:
+                for(i=1;i<=20;i++){
+                    for(j=1;j<=20;j++){
+                        if(i!=j){
+                            var result = matches.filter(obj => {
+                                return obj.homeTeam === i && obj.ospiteTeam === j
+                            })
+                        var result2 = matches.filter(obj => {
+                            return obj.homeTeam === j && obj.ospiteTeam === i
+                        })
+                        if(result.length<1 || result2.length<1){
+                            console.log("Non sono stati trovati i match per le squadre "+i+" "+j);
+                        }
+                        }
+                    }   
+                }
+                //Le squadre che condividono casa (1,2,3,4,5,6) non giocano in casa lo stesso giorno Team 1-2
+                var result = matches.filter(obj => {
+                                return obj.homeTeam === 1 || obj.homeTeam === 2
+                            })
+                for(let i=0;i<result.length;i++){
+                    for(let j=0;j<result.length;j++){
+                        if(i!=j){
+                            if(result[i].day==result[j].day){
+                                console.log("Due match nello stesso giorno in casa per i team 1-2");
+                            }
+                        }
+                    }
+                }
+                //Le squadre che condividono casa (1,2,3,4,5,6) non giocano in casa lo stesso giorno Team 3-4
+                var result = matches.filter(obj => {
+                                return obj.homeTeam === 3 || obj.homeTeam === 4
+                            })
+                for(let i=0;i<result.length;i++){
+                    for(let j=0;j<result.length;j++){
+                        if(i!=j){
+                            if(result[i].day==result[j].day){
+                                console.log("Due match nello stesso giorno in casa per i team 3-4");
+                            }
+                        }
+                    }
+                }
+                //Le squadre che condividono casa (1,2,3,4,5,6) non giocano in casa lo stesso giorno Team 5-6
+                var result = matches.filter(obj => {
+                                return obj.homeTeam === 5 || obj.homeTeam === 6
+                            })
+                for(let i=0;i<result.length;i++){
+                    for(let j=0;j<result.length;j++){
+                        if(i!=j){
+                            if(result[i].day==result[j].day){
+                                console.log("Due match nello stesso giorno in casa per i team 5-6");
+                            }
+                        }
+                    }
+                }
+
+                //Verificare che le partite di andata siano tutte prima di quelle di ritorno
+                for(i=1;i<=20;i++){
+                    for(j=1;j<=20;j++){
+                        if(i!=j){
+                            var result = matches.filter(obj => {
+                                return obj.homeTeam === i && obj.ospiteTeam === j
+                            })
+                        var result2 = matches.filter(obj => {
+                            return obj.homeTeam === j && obj.ospiteTeam === i
+                        })
+                            if(result.length>=1 && result2.length>=1){
+                                if((result[0].day<=19 && result2[0].day<=19) || (result[0].day>19 && result2[0].day>19)){
+                                    console.log("Due partite sono giocate nella stessa fase del girone, tra "+i+" e "+j+", i giorni: "+result[0].day+" "+result2[0].day);
+                                }
+                            }
+                        }
+                    }   
+                }
+                //Verificare che una squadra non giochi successivamente sempre in casa/fuori casa
+                //Verificare che la distanza tra giornata di andata e ritorno sia >10
+
+            }
+        </script>
+    </body>
+    
+    
+</html>
