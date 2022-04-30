@@ -1,9 +1,10 @@
+%10 Squadre 1 Derby
 squadra(1..20).
 ha_stadio(1,torino).
 ha_stadio(2,torino).
-ha_stadio(3,milano).
+ha_stadio(3,sassari).
 ha_stadio(4,milano).
-ha_stadio(5,roma).
+ha_stadio(5,catanissetta).
 ha_stadio(6,roma).
 ha_stadio(7,napoli).
 ha_stadio(8,bergamo).
@@ -86,25 +87,21 @@ contaAssegnamenti(Squadra1,Squadra2,NumeroAssegnamenti):-match(Squadra1,Squadra2
    Squadra21==Squadra12.
    
   
+%Questo vincolo può valere solo per le prime 5 giornate in quanto senza una squadra a riposo non si può garantire questo vincolo perchè finiscono le permutazioni valide
 :- giornata(Giornata1),     %Date due giornate successive la stessa squadra non eve giocare sempre in casa
-   giornata(Giornata2),
-   Giornata1<>Giornata2,
-   Giornata2 == Giornata1+1,
-   assegnaMatch(match(Squadra11,Squadra12),giornata(Giornata1)),
-   assegnaMatch(match(Squadra21,Squadra22),giornata(Giornata2)),
-   Squadra11==Squadra21.
-
-:- giornata(Giornata1),     %Date due giornate successive la stessa squadra non eve giocare sempre fuori di casa
-   giornata(Giornata2),
-   Giornata1<>Giornata2,
-   Giornata2 == Giornata1+1,
-   assegnaMatch(match(Squadra11,Squadra12),giornata(Giornata1)),
-   assegnaMatch(match(Squadra21,Squadra22),giornata(Giornata2)),
-   Squadra12==Squadra22.
+    Giornata1<2,
+    assegnaMatch(match(Squadra11,Squadra12),giornata(Giornata1)),
+    assegnaMatch(match(Squadra21,Squadra22),giornata(Giornata1 + 1)),
+    Squadra11 == Squadra21.
+:- giornata(Giornata1),     %Date due giornate successive la stessa squadra non eve giocare sempre in casa
+    Giornata1<2,
+    assegnaMatch(match(Squadra11,Squadra12),giornata(Giornata1)),
+    assegnaMatch(match(Squadra21,Squadra22),giornata(Giornata1 + 1)),
+    Squadra12 == Squadra22.
    
-:- match(Squadra1,Squadra2),
-   assegnaMatch(match(Squadra1,Squadra2),giornata(Giornata1)),
-   assegnaMatch(match(Squadra2,Squadra1),giornata(Giornata2)), 
-   absolute2(Giornata1-Giornata2)<10.
+%:- match(Squadra1,Squadra2),
+%   assegnaMatch(match(Squadra1,Squadra2),giornata(Giornata1)),
+%   assegnaMatch(match(Squadra2,Squadra1),giornata(Giornata2)), 
+%   absolute2(Giornata1-Giornata2)<10.
 
 #show assegnaMatch/2.
