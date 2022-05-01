@@ -6,7 +6,7 @@
 - sono iscritte 20 squadre ✅;
 - il campionato prevede 38 giornate, 19 di andata e 19 di ritorno NON
 simmetriche, ossia la giornata 1 di ritorno non coincide necessariamente con la
-giornata 1 di andata a campi invertiti 🟨;
+giornata 1 di andata a campi invertiti ✅;
 - ogni squadra fa riferimento ad una città, che offre la struttura in cui la squadra
 gioca gli incontri in casa ✅;
 - ogni squadra affronta due volte tutte le altre squadre, una volta in casa e una

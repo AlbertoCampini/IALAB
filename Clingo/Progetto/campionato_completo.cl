@@ -2,9 +2,9 @@
 squadra(1..20).
 ha_stadio(1,torino).
 ha_stadio(2,torino).
-ha_stadio(3,sassari).
+ha_stadio(3,milano).
 ha_stadio(4,milano).
-ha_stadio(5,catanissetta).
+ha_stadio(5,roma).
 ha_stadio(6,roma).
 ha_stadio(7,napoli).
 ha_stadio(8,bergamo).
@@ -99,9 +99,9 @@ contaAssegnamenti(Squadra1,Squadra2,NumeroAssegnamenti):-match(Squadra1,Squadra2
     assegnaMatch(match(Squadra21,Squadra22),giornata(Giornata1 + 1)),
     Squadra12 == Squadra22.
    
-%:- match(Squadra1,Squadra2),
-%   assegnaMatch(match(Squadra1,Squadra2),giornata(Giornata1)),
-%   assegnaMatch(match(Squadra2,Squadra1),giornata(Giornata2)), 
-%   absolute2(Giornata1-Giornata2)<10.
+:- match(Squadra1,Squadra2),
+   assegnaMatch(match(Squadra1,Squadra2),giornata(Giornata1)),
+   assegnaMatch(match(Squadra2,Squadra1),giornata(Giornata2)), 
+   absolute2(Giornata1-Giornata2)<10.
 
 #show assegnaMatch/2.

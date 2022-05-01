@@ -36,3 +36,8 @@ risultato, ossia abbia il formato prova(+ListaAzioni).
   - Sud Ovest
 
 ## Strategie implementate
+
+  - BLIND: il giocatore si muove in modo casuale per la mappa finchè non ha raggiunto tutti i checkpoint raggiungendo lo stato finale Checkpoints=[]
+  - Informata numero 1: il giocatore calcola ad ogni mossa qual è il checkpoint più vicino ed esegue le mosse a lui disponibili in modo che sia eseguita prima quella che lo avvicina di più : PROBLEMA se la mossa migliore non è disponibile a causa di muri, la maggior parte delle altre mosse risultano equidistanti dal checkpoint e si rischia di andare fuori strada, ricordando anche che non può ripassare su una casella già attraversata.
+  - Informata numero 2: il giocatore calcola ad ogni mossa qual è il checkpoint più vicino. Sulla base di questo calcola quale sarebbe la mossa migliore da eseguire indipendentemente dai muri. Il giocatore esegue la mossa che lo avvicina di più alla direzione migliore in cui dovrebbe andare, se non è disponibile usa ordinatamente le mosse più vicine a quella scelta, continua così finchè non riesce a spostarsi nella direzione migliore. Una volta spostato nella direzione migliore ricomincia la sua ricerca in modalità informata. Inoltre una volta raggiunto un checkpoint cancella la lista dei nodi visitati permettendogli di ripassare sulle stesse caselle.
+
