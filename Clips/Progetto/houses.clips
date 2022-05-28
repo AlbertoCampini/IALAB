@@ -1,0 +1,233 @@
+(defmodule MAIN (export ?ALL))
+
+;;****************
+;;* DEFFUNCTIONS *
+;;****************
+
+(deffunction MAIN::ask-question (?question ?allowed-values ?fact)
+   (printout t ?question)
+   (bind ?answer (read))
+   (if (lexemep ?answer) then (bind ?answer (lowcase ?answer)))
+   (while (not (member$ ?answer ?allowed-values)) do
+      (printout t ?question)
+      (bind ?answer (read))
+      (if (lexemep ?answer) then (bind ?answer (lowcase ?answer))))
+      (bind ?id (gensym*))
+   (if (not (eq ?answer unknown))then (modify ?fact (already-asked TRUE)) else (modify ?fact (already-asked ?id))) 
+   ?answer)
+
+(deffunction MAIN::ask-question-numeric (?question ?fact)
+   (printout t ?question)
+   (bind ?answer (read))
+   (if (lexemep ?answer) then (bind ?answer (lowcase ?answer)))
+   (while (and (not (integerp ?answer)) (not (eq ?answer unknown))) do
+      (printout t ?question)
+      (bind ?answer (read))
+      (if (lexemep ?answer) then (bind ?answer (lowcase ?answer))))
+      (bind ?id (gensym*))
+   (if (not (eq ?answer unknown))then (modify ?fact (already-asked TRUE)) else (modify ?fact (already-asked ?id))) 
+   ?answer)
+
+    (deftemplate MAIN::attribute
+    (slot name)
+    (slot value)
+    (slot certainty (default 100.0)))
+
+(defrule MAIN::combine-certainties ""
+  (declare (salience 100)
+           (auto-focus TRUE))
+  ?rem1 <- (attribute (name ?rel) (value ?val) (certainty ?per1))
+  ?rem2 <- (attribute (name ?rel) (value ?val) (certainty ?per2))
+  (test (neq ?rem1 ?rem2))
+  =>
+  (retract ?rem1)
+  (modify ?rem2 (certainty (/ (- (* 100 (+ ?per1 ?per2)) (* ?per1 ?per2)) 100))))
+
+(deffacts MAIN:sequence-controller
+   (phase-sequence QUESTIONS CHOOSE-QUALITIES HOUSES PRINT-RESULTS)
+)
+
+(defrule MAIN::change-phase
+   ?list <- (phase-sequence ?next-phase $?other-phases)
+=>
+   (focus ?next-phase)
+   (retract ?list)
+   (assert (phase-sequence $?other-phases ?next-phase))
+)
+
+;;******************
+;;*   QUESTION     *
+;;******************
+
+(defmodule QUESTIONS (import MAIN ?ALL) (export ?ALL))
+
+(deffacts QUESTIONS:question-number
+   (number-of-questions 0)
+)
+
+(defrule QUESTIONS::limit-questions
+   (declare (salience 100))
+   ?f <- (number-of-questions ?number & 5)
+=>
+   (retract ?f)
+   (assert (number-of-questions 0))
+   (focus MAIN))
+
+(deftemplate QUESTIONS::question
+   (slot attribute (default ?NONE))
+   (slot the-question (default ?NONE))
+   (multislot valid-answers (default ?NONE))
+   (slot already-asked (default FALSE))
+   (multislot precursors (default ?DERIVE)))
+(deftemplate QUESTIONS::question-numeric
+   (slot attribute (default ?NONE))
+   (slot the-question (default ?NONE))
+   (slot already-asked (default FALSE))
+   (multislot precursors (default ?DERIVE)))
+
+(defrule QUESTIONS::ask-a-new-question
+   (declare (salience 100))
+   ?f <- (question (already-asked FALSE)
+                   (precursors)
+                   (the-question ?the-question)
+                   (attribute ?the-attribute)
+                   (valid-answers $?valid-answers))
+   ?number <- (number-of-questions ?question-number)
+   =>
+   (assert (attribute (name ?the-attribute)
+                      (value (ask-question ?the-question ?valid-answers ?f))))
+   (assert (number-of-questions (+ ?question-number 1)))
+   (retract ?number)
+)
+
+(defrule QUESTIONS::re-ask-a-question
+   (declare (salience 50))
+   ?f <- (question (already-asked ~TRUE & ~FALSE)
+                   (precursors)
+                   (the-question ?the-question)
+                   (attribute ?the-attribute)
+                   (valid-answers $?valid-answers))
+   ?number <- (number-of-questions ?question-number)
+   =>
+   (assert (attribute (name ?the-attribute)
+                      (value (ask-question ?the-question ?valid-answers ?f))))
+   (assert (number-of-questions (+ ?question-number 1)))
+   (retract ?number)
+)
+
+(defrule QUESTIONS::ask-a-new-question-numeric
+   (declare (salience 150))
+   ?f <- (question-numeric (already-asked FALSE)
+                   (precursors)
+                   (the-question ?the-question)
+                   (attribute ?the-attribute))
+   ?number <- (number-of-questions ?question-number)
+   =>
+   (assert (attribute (name ?the-attribute)
+                      (value (ask-question-numeric ?the-question  ?f))))
+   (assert (number-of-questions (+ ?question-number 1)))
+   (retract ?number)
+)
+
+(defrule QUESTIONS::re-ask-a-question-numeric
+   (declare (salience 50))
+   ?f <- (question-numeric  (already-asked ~TRUE & ~FALSE)
+                   (precursors)
+                   (the-question ?the-question)
+                   (attribute ?the-attribute))
+
+   ?number <- (number-of-questions ?question-number)
+   =>
+   (assert (attribute (name ?the-attribute)
+                      (value (ask-question-numeric ?the-question ?f))))
+   (assert (number-of-questions (+ ?question-number 1)))
+   (retract ?number)
+)
+
+(defrule QUESTIONS::clear-unknown-value
+   (declare (salience 500))
+   ?a <- (attribute (value unknown))
+   =>
+   (retract ?a)
+)
+
+(defrule QUESTIONS::precursor-is-satisfied
+   ?f <- (question (already-asked FALSE)
+                   (precursors ?name is ?value $?rest))
+         (attribute (name ?name) (value ?value))
+   =>
+   (if (eq (nth$ 1 ?rest) and) 
+    then (modify ?f (precursors (rest$ ?rest)))
+    else (modify ?f (precursors ?rest))))
+
+(defrule QUESTIONS::precursor-is-not-satisfied
+   ?f <- (question (already-asked FALSE)
+                   (precursors ?name is-not ?value $?rest))
+         (attribute (name ?name) (value ~?value))
+   =>
+   (if (eq (nth$ 1 ?rest) and) 
+    then (modify ?f (precursors (rest$ ?rest)))
+    else (modify ?f (precursors ?rest))))
+
+;;******************
+;;* HOUSE-QUESTION *
+;;******************
+
+(defmodule HOUSE-QUESTIONS (import QUESTIONS ?ALL))
+    (deffacts HOUSE-QUESTIONS::question-attributes
+        (question (attribute city)
+                    (the-question "In che citta vorrebbe vivere? (Asti/Alessandria/Torino/Novara)")
+                    (valid-answers asti alessandria torino novara unknown))
+        (question (attribute location)
+                    (the-question "Ha una preferenza nella zona dell'immobile? (Centro/Periferia/Campagna)")
+                    (valid-answers centro periferia campagna unknown))
+        (question-numeric (attribute size)
+                    (the-question "Quanto deve essere grande l'immobile in MQ?"))
+         (question-numeric (attribute budget)
+                    (the-question "Qual è il budget massimo per l'acquisto dell'immobile?"))
+         (question (attribute children)
+                    (the-question "Ha dei figli? (Si/No)")
+                    (valid-answers si no unknown))
+         (question (attribute house-type)
+                    (the-question "Ha qualche preferenza sulla tipologia dell'immobile? (Appartamento/Villetta/Indipendente)")
+                    (valid-answers appartamento villetta indipendente unknown))
+         (question-numeric (attribute floor)
+                    (precursors house-type is appartamento)
+                    (the-question "Ha una preferenza sul piano dell'immobile?")) 
+          (question (attribute elevator)
+                    (precursors house-type is appartamento)
+                    (the-question "Ha esigenza dell'ascensore? (Si/No)")
+                    (valid-answers si no unknown)) 
+         (question (attribute box-auto)
+                    (the-question "Ha esigenza del box auto? (Si/No)")
+                    (valid-answers si no unknown)) 
+         (question (attribute outside)
+                    (the-question "Le piace passare del tmepo all'aperto? (Si/No)")
+                    (valid-answers si no unknown))         
+         (question (attribute gardening)
+                    (the-question "Le piace passare il giardinaggio? (Si/No)")
+                    (valid-answers si no unknown)) 
+         (question (attribute eco)
+                    (the-question "L'ecosostenibilità le sta a cuore? (Si/No)")
+                    (valid-answers si no unknown))  
+         (question (attribute restauration)
+                    (the-question "L'immobile deve essere già ristrutturato? (Si/No)")
+                    (valid-answers si no unknown))    
+         (question (attribute sport)
+                    (the-question "Nel tempo libero pratica sport? (Si/No)")
+                    (valid-answers si no unknown)) 
+                    )
+
+(defmodule RULES (import MAIN ?ALL) (export ?ALL))
+
+(defmodule CHOOSE-QUALITIES (import RULES ?ALL)
+                            (import QUESTIONS ?ALL)
+                            (import MAIN ?ALL))
+
+(defmodule HOUSES (import MAIN ?ALL))
+
+(defmodule PRINT-RESULTS (import MAIN ?ALL))
+
+
+
+
