@@ -1,9 +1,12 @@
 (defmodule MAIN (export ?ALL))
 
 ;;****************
-;;* DEFFUNCTIONS *
+;;*    MAIN      *
 ;;****************
 
+;Function to ask a question with a list of allowed values
+;If the answer is != from unknown we set the question as already asked
+;Otherwise we bind it with a random id to signify that is already been asked
 (deffunction MAIN::ask-question (?question ?allowed-values ?fact)
    (printout t ?question)
    (bind ?answer (read))
@@ -15,7 +18,9 @@
       (bind ?id (gensym*))
    (if (not (eq ?answer unknown))then (modify ?fact (already-asked TRUE)) else (modify ?fact (already-asked ?id))) 
    ?answer)
-
+;Function to ask a question with numeric response
+;If the answer is != from unknown we set the question as already asked
+;Otherwise we bind it with a random id to signify that is already been asked
 (deffunction MAIN::ask-question-numeric (?question ?fact)
    (printout t ?question)
    (bind ?answer (read))
@@ -26,13 +31,17 @@
       (if (lexemep ?answer) then (bind ?answer (lowcase ?answer))))
       (bind ?id (gensym*))
    (if (not (eq ?answer unknown))then (modify ?fact (already-asked TRUE)) else (modify ?fact (already-asked ?id))) 
+   (if (eq ?answer unknown) then (bind ?answer -1))
    ?answer)
+
+;Template for attribute, it is used to store attributeds derived from question responses
+;Used to store user preferences
 
     (deftemplate MAIN::attribute
     (slot name)
     (slot value)
-    (slot certainty (default 100.0)))
-
+    (slot certainty (default 100)))
+;Rule used to combine certanties for multiple attributes with same name
 (defrule MAIN::combine-certainties ""
   (declare (salience 100)
            (auto-focus TRUE))
@@ -43,10 +52,11 @@
   (retract ?rem1)
   (modify ?rem2 (certainty (/ (- (* 100 (+ ?per1 ?per2)) (* ?per1 ?per2)) 100))))
 
+;Fact used to store the correct sequence loop
 (deffacts MAIN:sequence-controller
    (phase-sequence QUESTIONS CHOOSE-QUALITIES HOUSES PRINT-RESULTS)
 )
-
+;Rule used to move to the next sequence of the loop
 (defrule MAIN::change-phase
    ?list <- (phase-sequence ?next-phase $?other-phases)
 =>
@@ -61,10 +71,12 @@
 
 (defmodule QUESTIONS (import MAIN ?ALL) (export ?ALL))
 
+;Fact used to represent the number of questions
+;asked in this question instance
 (deffacts QUESTIONS:question-number
    (number-of-questions 0)
 )
-
+;Rule used to check when we asked 5 questions and then move to the next phase
 (defrule QUESTIONS::limit-questions
    (declare (salience 100))
    ?f <- (number-of-questions ?number & 5)
@@ -73,77 +85,103 @@
    (assert (number-of-questions 0))
    (focus MAIN))
 
+;Themplate of the standard question with multiple valid answers
 (deftemplate QUESTIONS::question
    (slot attribute (default ?NONE))
    (slot the-question (default ?NONE))
    (multislot valid-answers (default ?NONE))
    (slot already-asked (default FALSE))
-   (multislot precursors (default ?DERIVE)))
+   (multislot precursors (default ?DERIVE))
+   (slot certainty (default 100)))
+
+;Themplate of the  question with numeric response
 (deftemplate QUESTIONS::question-numeric
    (slot attribute (default ?NONE))
    (slot the-question (default ?NONE))
    (slot already-asked (default FALSE))
-   (multislot precursors (default ?DERIVE)))
+   (multislot precursors (default ?DERIVE))
+   (slot certainty (default 100)))
 
+;;*************************************
+;;*   RULE FOR STANDARD QUESTIONS     *
+;;*************************************
+
+;Rule to ask a new question, has more importance than the already asked ones
 (defrule QUESTIONS::ask-a-new-question
    (declare (salience 100))
    ?f <- (question (already-asked FALSE)
                    (precursors)
                    (the-question ?the-question)
                    (attribute ?the-attribute)
-                   (valid-answers $?valid-answers))
+                   (valid-answers $?valid-answers)
+                   (certainty ?certainty))
    ?number <- (number-of-questions ?question-number)
    =>
    (assert (attribute (name ?the-attribute)
-                      (value (ask-question ?the-question ?valid-answers ?f))))
+                      (value (ask-question ?the-question ?valid-answers ?f))
+                      (certainty ?certainty)))
    (assert (number-of-questions (+ ?question-number 1)))
    (retract ?number)
 )
 
+;Rule to ask a already asked question
 (defrule QUESTIONS::re-ask-a-question
    (declare (salience 50))
    ?f <- (question (already-asked ~TRUE & ~FALSE)
                    (precursors)
                    (the-question ?the-question)
                    (attribute ?the-attribute)
-                   (valid-answers $?valid-answers))
+                   (valid-answers $?valid-answers)
+                   (certainty ?certainty))
    ?number <- (number-of-questions ?question-number)
    =>
    (assert (attribute (name ?the-attribute)
-                      (value (ask-question ?the-question ?valid-answers ?f))))
+                      (value (ask-question ?the-question ?valid-answers ?f))
+                      (certainty ?certainty)))
    (assert (number-of-questions (+ ?question-number 1)))
    (retract ?number)
 )
 
+;;*************************************
+;;*   RULE FOR NUMERIC QUESTIONS      *
+;;*************************************
+
+;Rule to ask a new question, has more importance than the already asked ones
 (defrule QUESTIONS::ask-a-new-question-numeric
    (declare (salience 150))
    ?f <- (question-numeric (already-asked FALSE)
                    (precursors)
                    (the-question ?the-question)
-                   (attribute ?the-attribute))
+                   (attribute ?the-attribute)
+                   (certainty ?certainty))
    ?number <- (number-of-questions ?question-number)
    =>
    (assert (attribute (name ?the-attribute)
-                      (value (ask-question-numeric ?the-question  ?f))))
+                      (value (ask-question-numeric ?the-question  ?f))
+                      (certainty ?certainty)))
    (assert (number-of-questions (+ ?question-number 1)))
    (retract ?number)
 )
 
+;Rule to ask a already asked question
 (defrule QUESTIONS::re-ask-a-question-numeric
    (declare (salience 50))
    ?f <- (question-numeric  (already-asked ~TRUE & ~FALSE)
                    (precursors)
                    (the-question ?the-question)
-                   (attribute ?the-attribute))
+                   (attribute ?the-attribute)
+                   (certainty ?certainty))
 
    ?number <- (number-of-questions ?question-number)
    =>
    (assert (attribute (name ?the-attribute)
-                      (value (ask-question-numeric ?the-question ?f))))
+                      (value (ask-question-numeric ?the-question ?f))
+                      (certainty ?certainty)))
    (assert (number-of-questions (+ ?question-number 1)))
    (retract ?number)
 )
 
+;Rule to clear the unknown attributes    
 (defrule QUESTIONS::clear-unknown-value
    (declare (salience 500))
    ?a <- (attribute (value unknown))
@@ -151,6 +189,15 @@
    (retract ?a)
 )
 
+;Rule to clear the unknown attributes    
+(defrule QUESTIONS::clear-unknown-value
+   (declare (salience 500))
+   ?a <- (attribute (value -1))
+   =>
+   (retract ?a)
+)
+
+;Rule to check if the precursor of a question is satisfied  
 (defrule QUESTIONS::precursor-is-satisfied
    ?f <- (question (already-asked FALSE)
                    (precursors ?name is ?value $?rest))
@@ -174,36 +221,46 @@
 ;;******************
 
 (defmodule HOUSE-QUESTIONS (import QUESTIONS ?ALL))
+
+   ;All the question
     (deffacts HOUSE-QUESTIONS::question-attributes
         (question (attribute city)
                     (the-question "In che citta vorrebbe vivere? (Asti/Alessandria/Torino/Novara)")
-                    (valid-answers asti alessandria torino novara unknown))
+                    (valid-answers asti alessandria torino novara unknown)
+                    (certainty 30))
         (question (attribute location)
                     (the-question "Ha una preferenza nella zona dell'immobile? (Centro/Periferia/Campagna)")
-                    (valid-answers centro periferia campagna unknown))
+                    (valid-answers centro periferia campagna unknown)
+                    (certainty 30))
         (question-numeric (attribute size)
-                    (the-question "Quanto deve essere grande l'immobile in MQ?"))
+                    (the-question "Quanto deve essere grande l'immobile in MQ?")
+                    (certainty 40))
          (question-numeric (attribute budget)
-                    (the-question "Qual è il budget massimo per l'acquisto dell'immobile?"))
+                    (the-question "Qual è il budget massimo per l'acquisto dell'immobile? (In K)")
+                    (certainty 30))
+         (question (attribute outside)
+                    (the-question "Le piace passare del tmepo all'aperto? (Si/No)")
+                    (valid-answers si no unknown))   
          (question (attribute children)
                     (the-question "Ha dei figli? (Si/No)")
                     (valid-answers si no unknown))
          (question (attribute house-type)
-                    (the-question "Ha qualche preferenza sulla tipologia dell'immobile? (Appartamento/Villetta/Indipendente)")
-                    (valid-answers appartamento villetta indipendente unknown))
+                    (the-question "Quale deve essere la tipologia dell'immobile? (Appartamento/Villetta/Indipendente)")
+                    (valid-answers appartamento villetta indipendente unknown)
+                    (certainty 30))
          (question-numeric (attribute floor)
                     (precursors house-type is appartamento)
-                    (the-question "Ha una preferenza sul piano dell'immobile?")) 
+                    (the-question "Ha una preferenza sul piano dell'immobile?")
+                    (certainty 70)) 
           (question (attribute elevator)
                     (precursors house-type is appartamento)
                     (the-question "Ha esigenza dell'ascensore? (Si/No)")
-                    (valid-answers si no unknown)) 
+                    (valid-answers si no unknown)
+                    (certainty 80)) 
          (question (attribute box-auto)
                     (the-question "Ha esigenza del box auto? (Si/No)")
-                    (valid-answers si no unknown)) 
-         (question (attribute outside)
-                    (the-question "Le piace passare del tmepo all'aperto? (Si/No)")
-                    (valid-answers si no unknown))         
+                    (valid-answers si no unknown)
+                    (certainty 80))       
          (question (attribute gardening)
                     (the-question "Le piace passare il giardinaggio? (Si/No)")
                     (valid-answers si no unknown)) 
@@ -212,22 +269,331 @@
                     (valid-answers si no unknown))  
          (question (attribute restauration)
                     (the-question "L'immobile deve essere già ristrutturato? (Si/No)")
-                    (valid-answers si no unknown))    
+                    (valid-answers si no unknown)
+                    (certainty 60))    
          (question (attribute sport)
                     (the-question "Nel tempo libero pratica sport? (Si/No)")
                     (valid-answers si no unknown)) 
                     )
-
+;;******************
+;;*      RULES     *
+;;******************
 (defmodule RULES (import MAIN ?ALL) (export ?ALL))
 
+(deftemplate RULES::rule
+  (slot certainty (default 100.0))
+  (multislot if)
+  (multislot then))
+
+(defrule RULES::throw-away-ands-in-antecedent
+  ?f <- (rule (if and $?rest))
+  =>
+  (modify ?f (if ?rest)))
+
+(defrule RULES::throw-away-ands-in-consequent
+  ?f <- (rule (then and $?rest))
+  =>
+  (modify ?f (then ?rest)))
+
+(defrule RULES::remove-is-condition-when-satisfied
+  ?f <- (rule (certainty ?c1) 
+              (if ?attribute is ?value $?rest))
+  (attribute (name ?attribute) 
+             (value ?value) 
+             (certainty ?c2))
+  =>
+  (modify ?f (certainty (min ?c1 ?c2)) (if ?rest)))
+
+(defrule RULES::remove-is-not-condition-when-satisfied
+  ?f <- (rule (certainty ?c1) 
+              (if ?attribute is-not ?value $?rest))
+  (attribute (name ?attribute) (value ~?value) (certainty ?c2))
+  =>
+  (modify ?f (certainty (min ?c1 ?c2)) (if ?rest)))
+
+(defrule RULES::perform-rule-consequent-with-certainty
+  ?f <- (rule (certainty ?c1) 
+              (if) 
+              (then ?attribute is ?value with certainty ?c2 $?rest))
+  =>
+  (modify ?f (then ?rest))
+  (assert (attribute (name ?attribute) 
+                     (value ?value)
+                     (certainty (/ (* ?c1 ?c2) 100)))))
+
+(defrule RULES::perform-rule-consequent-without-certainty
+  ?f <- (rule (certainty ?c1)
+              (if)
+              (then ?attribute is ?value $?rest))
+  (test (or (eq (length$ ?rest) 0)
+            (neq (nth$ 1 ?rest) with)))
+  =>
+  (modify ?f (then ?rest))
+  (assert (attribute (name ?attribute) (value ?value) (certainty ?c1))))
+
+
+
+;;**************************
+;;*  CHOOSE-QUALITIES     *
+;;**************************
 (defmodule CHOOSE-QUALITIES (import RULES ?ALL)
                             (import QUESTIONS ?ALL)
                             (import MAIN ?ALL))
 
+(defrule CHOOSE-QUALITIES::startit => (focus RULES))
+
+(deffacts house-rules
+
+  (rule (if outside is si)
+        (then like-spazi-esterni is balcone with certainty 30 and
+         like-spazi-esterni is terrazzo with certainty 50 and
+         like-spazi-esterni is giardino with certainty 70 and 
+         like-servizi is parco with certainty 35
+        )
+   )
+
+   (rule (if children is si)
+        (then like-vani is 3 with certainty 70 and
+         like-servizi is scuola with certainty 70
+        )
+   )
+
+   (rule (if sport is si)
+        (then like-servizi is parco with certainty 40 and
+         like-servizi is parco with certainty 70 and
+         like-servizi is parco with certainty 60
+        )
+   )
+
+   (rule (if gardening is si)
+        (then house-type is villetta with certainty 40 and
+         house-type is indipendente with certainty 70 and
+         like-spazi-esterni is giardino with certainty 70 and 
+        )
+   )
+
+   (rule (if eco is si)
+        (then like-servizi is metro with certainty 60 and
+         like-servizi is parco with certainty 40 and
+         classe-energ is a with certainty 70
+        )
+   )
+)
+
+;;******************
+;;*     HOUSE      *
+;;******************
+
 (defmodule HOUSES (import MAIN ?ALL))
+
+(deftemplate HOUSES::house
+  (slot identifier (default ?NONE))
+  (slot metriQuadri (default any))
+  (slot numeroVani (default any))
+  (slot numeroServizi (default any))
+  (slot numeroPiano (default any))
+  (slot citta (default any))
+  (slot quartiere (default any))
+  (slot ascensore (default any))
+  (slot boxAuto (default any))
+  (multislot spaziEsterni (default any))
+  (slot prezzo (default any))
+  (slot tipologia (default any))
+  (slot classeEnergetica (default any))
+  (slot ristrutturata (default any)))
+
+(deftemplate HOUSES::quartiere
+  (slot nomeCitta (default any))
+  (slot nomeQuartiere (default any))
+  (multislot servizi (default any))
+  )
+
+(deffacts HOUSES::house-list
+  (house (identifier 1) (metriQuadri 100) (numeroVani 4) (numeroPiano 1) (numeroServizi 2) (citta torino) 
+  (quartiere centro) (ascensore si) (boxAuto no) 
+  (spaziEsterni balcone terrazzo) (prezzo 150) (tipologia appartamento)
+  (classeEnergetica a) (ristrutturata si) )
+  (house (identifier 2) (metriQuadri 80) (numeroVani 2) (numeroPiano 3) (numeroServizi 1) (citta asti) 
+  (quartiere periferia) (ascensore no) (boxAuto si) 
+  (spaziEsterni giardino) (prezzo 250) (tipologia villetta)
+  (classeEnergetica c) (ristrutturata no) )
+  )
+
+(deffacts HOUSES::quartiere-list
+  (quartiere (nomeCitta torino) (nomeQuartiere centro) (servizi scuola metro parco))
+  (quartiere (nomeCitta asti) (nomeQuartiere periferia) (servizi scuola))
+  )
+
+
+;Vincoli soft
+(defrule HOUSES::generate-house-like-spazi-esterni
+  (house (identifier ?id) (spaziEsterni $? ?c $?))
+  (attribute (name like-spazi-esterni) (value ?c) (certainty ?certainty))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-servizi
+  (quartiere (nomeCitta ?citta) (nomeQuartiere ?quartiere) (servizi $? ?c $?))
+  (attribute (name like-servizi) (value ?c) (certainty ?certainty))
+  (house (identifier ?id) (citta ?citta) (quartiere ?quartiere))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-city
+  (attribute (name city) (value ?citta) (certainty ?certainty))
+  (house (identifier ?id) (citta ?citta))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-quartiere
+  (attribute (name location) (value ?quartiere) (certainty ?certainty))
+  (house (identifier ?id) (quartiere ?quartiere))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-size
+  (attribute (name size) (value ?size) (certainty ?certainty))
+  (house (identifier ?id) (metriQuadri ?realsize))
+  (test (and (> ?realsize (- ?size  10))  (< ?realsize (+ ?size  10))))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-budget
+  (attribute (name budget) (value ?priceChosen) (certainty ?certainty))
+  (house (identifier ?id) (prezzo ?prezzo&:(< ?prezzo ?priceChosen)))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-vani
+  (attribute (name like-vani) (value ?numeroVani) (certainty ?certainty))
+  (house (identifier ?id) (numeroVani ?vani&:(>= ?vani ?numeroVani)))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-piano
+  (attribute (name floor) (value ?floor) (certainty ?certainty))
+  (house (identifier ?id) (numeroPiano ?piano&:(= ?piano ?floor)))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-house-type
+  (attribute (name house-type) (value ?type) (certainty ?certainty))
+  (house (identifier ?id) (tipologia ?tipo&:(= ?type ?tipo)))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-ascensore
+  (attribute (name elevator) (value si) (certainty ?certainty))
+  (house (identifier ?id) (ascensore si))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-box-auto
+  (attribute (name box-auto) (value si) (certainty ?certainty))
+  (house (identifier ?id) (boxAuto si))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-restauration
+  (attribute (name restauration) (value si) (certainty ?certainty))
+  (house (identifier ?id) (ristrutturata si))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+(defrule HOUSES::generate-house-like-classe-energ
+  (attribute (name classe-energ) (value ?val) (certainty ?certainty))
+  (house (identifier ?id) (classeEnergetica ?val))
+  =>
+  (assert (attribute (name house) (value ?id)
+                     (certainty ?certainty))))
+
+
+;Vincoli hard
+
+(defrule HOUSES::delete-house-like-city
+  (attribute (name city) (value ?citta))
+  ?h<-(attribute (name house) (value ?identifier))
+  (not(house (identifier ?identifier) (citta ?citta)))
+  =>
+  (retract ?h))
+
+(defrule HOUSES::delete-house-like-city
+  (attribute (name budget) (value ?priceChosen))
+  ?h<-(attribute (name house) (value ?identifier))
+  (not(house (identifier ?identifier) (prezzo ?prezzo&:(< ?prezzo ?priceChosen))))
+  =>
+  (retract ?h))
+
+(defrule HOUSES::delete-house-like-type
+  (attribute (name house-type) (value ?houseType))
+  ?h<-(attribute (name house) (value ?identifier))
+  (not(house (identifier ?identifier) (tipologia ?houseType)))
+  =>
+  (retract ?h))
+
+(defrule HOUSES::delete-house-like-type
+  (attribute (name box-auto) (value si))
+  ?h<-(attribute (name house) (value ?identifier))
+  (not(house (identifier ?identifier) (boxAuto si)))
+  =>
+  (retract ?h))
+
+
+(defrule HOUSES::delete-house-like-ascensore
+  (attribute (name elevator) (value si))
+  ?h<-(attribute (name house) (value ?identifier))
+  (not(house (identifier ?identifier) (ascensore si)))
+  =>
+  (retract ?h))
+
+(defrule HOUSES::delete-house-like-ristrutturata
+  (attribute (name restauration) (value si))
+  ?h<-(attribute (name house) (value ?identifier))
+  (not(house (identifier ?identifier) (ristrutturata si)))
+  =>
+  (retract ?h))
+
+;;******************
+;;*  PRINT-RESULT  *
+;;******************
 
 (defmodule PRINT-RESULTS (import MAIN ?ALL))
 
+(defrule PRINT-RESULTS::header ""
+   (declare (salience 10))
+   =>
+   (printout t "        SELECTED HOUSES"  crlf)
+   (printout t " HOUSE                  CERTAINTY" crlf)
+   (printout t " -------------------------------" crlf)
+   (assert (phase print-wines)))
 
+(defrule PRINT-RESULTS::print-house ""
+  ?rem <- (attribute (name house) (value ?id) (certainty ?per))		  
+  (not (attribute (name house) (certainty ?per1&:(> ?per1 ?per))))
+  =>
+  (retract ?rem)
+  (format t " %-d %2d%%%n" ?id ?per))
+
+(defrule PRINT-RESULTS::remove-poor-house-choices ""
+  ?rem <- (attribute (name house) (certainty ?per&:(< ?per 20)))
+  =>
+  (retract ?rem))
+
+(defrule PRINT-RESULTS::end-spaces ""
+   (not (attribute (name house)))
+   =>
+   (printout t crlf))
 
 
