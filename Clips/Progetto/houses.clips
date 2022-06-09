@@ -262,7 +262,7 @@
                     (valid-answers si no unknown)
                     (certainty 80))       
          (question (attribute gardening)
-                    (the-question "Le piace passare il giardinaggio? (Si/No)")
+                    (the-question "Le piace il giardinaggio? (Si/No)")
                     (valid-answers si no unknown)) 
          (question (attribute eco)
                     (the-question "L'ecosostenibilità le sta a cuore? (Si/No)")
@@ -486,7 +486,7 @@
 
 (defrule HOUSES::generate-house-like-house-type
   (attribute (name house-type) (value ?type) (certainty ?certainty))
-  (house (identifier ?id) (tipologia ?tipo&:(= ?type ?tipo)))
+  (house (identifier ?id) (tipologia ?type))
   =>
   (assert (attribute (name house) (value ?id)
                      (certainty ?certainty))))
