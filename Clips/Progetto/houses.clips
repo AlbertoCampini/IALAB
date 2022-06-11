@@ -411,17 +411,71 @@
 (deffacts HOUSES::house-list
   (house (identifier 1) (metriQuadri 100) (numeroVani 4) (numeroPiano 1) (numeroServizi 2) (citta torino) 
   (quartiere centro) (ascensore si) (boxAuto no) 
-  (spaziEsterni balcone terrazzo) (prezzo 150) (tipologia appartamento)
+  (spaziEsterni balcone terrazzo) (prezzo 350) (tipologia appartamento)
   (classeEnergetica a) (ristrutturata si) )
+
   (house (identifier 2) (metriQuadri 80) (numeroVani 2) (numeroPiano 3) (numeroServizi 1) (citta asti) 
   (quartiere periferia) (ascensore no) (boxAuto si) 
   (spaziEsterni giardino) (prezzo 250) (tipologia villetta)
   (classeEnergetica c) (ristrutturata no) )
+
+  (house (identifier 3) (metriQuadri 180) (numeroVani 4) (numeroPiano 3) (numeroServizi 2) (citta asti) 
+  (quartiere campagna) (ascensore no) (boxAuto si) 
+  (spaziEsterni giardino) (prezzo 300) (tipologia villetta)
+  (classeEnergetica a) (ristrutturata si) )
+
+  (house (identifier 4) (metriQuadri 50) (numeroVani 1) (numeroPiano 5) (numeroServizi 1) (citta torino) 
+  (quartiere centro) (ascensore si) (boxAuto no) 
+  (spaziEsterni balcone) (prezzo 80) (tipologia appartamento)
+  (classeEnergetica a) (ristrutturata si) )
+
+  (house (identifier 5) (metriQuadri 160) (numeroVani 5) (numeroPiano 3) (numeroServizi 2) (citta torino) 
+  (quartiere campagna) (ascensore si) (boxAuto si) 
+  (spaziEsterni terrazzo) (prezzo 200) (tipologia appartamento)
+  (classeEnergetica a) (ristrutturata si) )
+
+  (house (identifier 6) (metriQuadri 80) (numeroVani 2) (numeroPiano 5) (numeroServizi 2) (citta alessadnria) 
+  (quartiere periferia) (ascensore si) (boxAuto si) 
+  (spaziEsterni giardino) (prezzo 200) (tipologia villetta)
+  (classeEnergetica b) (ristrutturata no) )
+
+  (house (identifier 7) (metriQuadri 70) (numeroVani 3) (numeroPiano 3) (numeroServizi 2) (citta alessadnria) 
+  (quartiere campagna) (ascensore si) (boxAuto si) 
+  (spaziEsterni terrazzo) (prezzo 150) (tipologia appartamento)
+  (classeEnergetica a) (ristrutturata si) )
+
+  (house (identifier 8) (metriQuadri 70) (numeroVani 3) (numeroPiano 4) (numeroServizi 1) (citta torino) 
+  (quartiere campagna) (ascensore si) (boxAuto si) 
+  (spaziEsterni terrazzo) (prezzo 200) (tipologia appartamento)
+  (classeEnergetica a) (ristrutturata no) )
+
+  (house (identifier 9) (metriQuadri 100) (numeroVani 4) (numeroPiano 4) (numeroServizi 1) (citta novara) 
+  (quartiere periferia) (ascensore no) (boxAuto si) 
+  (spaziEsterni balcone) (prezzo 100) (tipologia appartamento)
+  (classeEnergetica b) (ristrutturata no) )
+
+   (house (identifier 10) (metriQuadri 250) (numeroVani 6) (numeroPiano 1) (numeroServizi 3) (citta asti) 
+  (quartiere campagna) (ascensore no) (boxAuto si) 
+  (spaziEsterni giardino) (prezzo 350) (tipologia villetta)
+  (classeEnergetica a) (ristrutturata si) )
+
+   (house (identifier 11) (metriQuadri 120) (numeroVani 4) (numeroPiano 3) (numeroServizi 2) (citta torino) 
+  (quartiere centro) (ascensore si) (boxAuto si) 
+  (spaziEsterni balcone terrazzo) (prezzo 450) (tipologia appartamento)
+  (classeEnergetica a) (ristrutturata si) )
   )
 
 (deffacts HOUSES::quartiere-list
   (quartiere (nomeCitta torino) (nomeQuartiere centro) (servizi scuola metro parco))
+  (quartiere (nomeCitta torino) (nomeQuartiere periferia) (servizi scuola parco))
+  (quartiere (nomeCitta torino) (nomeQuartiere campagna) (servizi parco))
   (quartiere (nomeCitta asti) (nomeQuartiere periferia) (servizi scuola))
+  (quartiere (nomeCitta asti) (nomeQuartiere campagna) (servizi scuola parco))
+  (quartiere (nomeCitta alessandria) (nomeQuartiere centro) (servizi scuola metro parco))
+  (quartiere (nomeCitta alessandria) (nomeQuartiere periferia) (servizi scuola parco))
+  (quartiere (nomeCitta alessandria) (nomeQuartiere campagna) (servizi scuola))
+  (quartiere (nomeCitta novara) (nomeQuartiere periferia) (servizi scuola))
+  (quartiere (nomeCitta novara) (nomeQuartiere campagna) (servizi scuola parco))
   )
 
 
