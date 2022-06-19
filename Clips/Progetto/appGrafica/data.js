@@ -6,7 +6,8 @@ const quartiere = [
     "servizi":[
         "scuola",
         "metro",
-        "parco"
+        "parco",
+        "palestra"
     ]
 },
 {
@@ -14,7 +15,8 @@ const quartiere = [
   "nomeQuartiere":"periferia", 
   "servizi":[
       "scuola",
-      "parco"
+      "parco",
+      "palestra"
   ]
 },
 {
@@ -28,15 +30,16 @@ const quartiere = [
   "nomeCitta":"asti", 
   "nomeQuartiere":"periferia", 
   "servizi":[
-    "parco"
+    "scuola",
+    "palestra"
   ]
 },
 {
   "nomeCitta":"asti", 
   "nomeQuartiere":"campagna", 
   "servizi":[
-    "scuola"
-   
+    "scuola",
+    "parco"
   ]
 },
 {
@@ -204,7 +207,7 @@ let house = [
         "numeroVani": 3,
         "numeroPiano": 3,
         "numeroServizi": 2,
-        "citta": "alessandria ",
+        "citta": "alessandria",
         "quartiere": "campagna",
         "ascensore": "si",
         "boxAuto": "si",

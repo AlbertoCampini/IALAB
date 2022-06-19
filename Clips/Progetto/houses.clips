@@ -18,6 +18,7 @@
       (bind ?id (gensym*))
    (if (not (eq ?answer unknown))then (modify ?fact (already-asked TRUE)) else (modify ?fact (already-asked ?id))) 
    ?answer)
+
 ;Function to ask a question with numeric response
 ;If the answer is != from unknown we set the question as already asked
 ;Otherwise we bind it with a random id to signify that is already been asked
@@ -43,8 +44,7 @@
     (slot certainty (default 100)))
 ;Rule used to combine certanties for multiple attributes with same name
 (defrule MAIN::combine-certainties ""
-  (declare (salience 100)
-           (auto-focus TRUE))
+  (declare (salience 100))
   ?rem1 <- (attribute (name ?rel) (value ?val) (certainty ?per1))
   ?rem2 <- (attribute (name ?rel) (value ?val) (certainty ?per2))
   (test (neq ?rem1 ?rem2))
@@ -55,14 +55,18 @@
 ;Fact used to store the correct sequence loop
 (deffacts MAIN:sequence-controller
    (phase-sequence QUESTIONS CHOOSE-QUALITIES HOUSES PRINT-RESULTS)
+   (refresh-fact gensym)
 )
 ;Rule used to move to the next sequence of the loop
 (defrule MAIN::change-phase
    ?list <- (phase-sequence ?next-phase $?other-phases)
+   ?refreshFact <- (refresh-fact ?val)
 =>
    (focus ?next-phase)
    (retract ?list)
    (assert (phase-sequence $?other-phases ?next-phase))
+   (retract ?refreshFact)
+   (assert (refresh-fact gensym))
 )
 
 ;;******************
@@ -78,7 +82,7 @@
 )
 ;Rule used to check when we asked 5 questions and then move to the next phase
 (defrule QUESTIONS::limit-questions
-   (declare (salience 100))
+   (declare (salience 200))
    ?f <- (number-of-questions ?number & 5)
 =>
    (retract ?f)
@@ -183,18 +187,24 @@
 
 ;Rule to clear the unknown attributes    
 (defrule QUESTIONS::clear-unknown-value
-   (declare (salience 500))
+   (declare (salience 300))
    ?a <- (attribute (value unknown))
    =>
    (retract ?a)
 )
 
 ;Rule to clear the unknown attributes    
-(defrule QUESTIONS::clear-unknown-value
-   (declare (salience 500))
+(defrule QUESTIONS::clear-unknown-value-numeric
+   (declare (salience 300))
    ?a <- (attribute (value -1))
    =>
    (retract ?a)
+)
+
+(defrule  QUESTIONS::clear-focus-MAIN
+  (declare (salience -100))
+  =>
+  (focus MAIN)
 )
 
 ;Rule to check if the precursor of a question is satisfied  
@@ -238,12 +248,12 @@
          (question-numeric (attribute budget)
                     (the-question "Qual è il budget massimo per l'acquisto dell'immobile? (In K)")
                     (certainty 30))
-         (question (attribute outside)
-                    (the-question "Le piace passare del tmepo all'aperto? (Si/No)")
-                    (valid-answers si no unknown))   
          (question (attribute children)
                     (the-question "Ha dei figli? (Si/No)")
                     (valid-answers si no unknown))
+         (question (attribute outside)
+                    (the-question "Le piace passare del tempo all'aperto? (Si/No)")
+                    (valid-answers si no unknown))   
          (question (attribute house-type)
                     (the-question "Quale deve essere la tipologia dell'immobile? (Appartamento/Villetta/Indipendente)")
                     (valid-answers appartamento villetta indipendente unknown)
@@ -340,7 +350,11 @@
                             (import QUESTIONS ?ALL)
                             (import MAIN ?ALL))
 
-(defrule CHOOSE-QUALITIES::startit => (focus RULES))
+(defrule CHOOSE-QUALITIES::startit 
+  (refresh-fact ?val)
+  => 
+  (focus RULES)
+  )
 
 (deffacts house-rules
 
@@ -354,14 +368,13 @@
 
    (rule (if children is si)
         (then like-vani is 3 with certainty 70 and
-         like-servizi is scuola with certainty 70
+         like-servizi is scuola with certainty 80
         )
    )
 
    (rule (if sport is si)
         (then like-servizi is parco with certainty 40 and
-         like-servizi is parco with certainty 70 and
-         like-servizi is parco with certainty 60
+         like-servizi is palestra with certainty 60
         )
    )
 
@@ -460,16 +473,16 @@
   (classeEnergetica a) (ristrutturata si) )
 
    (house (identifier 11) (metriQuadri 120) (numeroVani 4) (numeroPiano 3) (numeroServizi 2) (citta torino) 
-  (quartiere centro) (ascensore si) (boxAuto si) 
+  (quartiere centro) (ascensore si) (boxAuto no) 
   (spaziEsterni balcone terrazzo) (prezzo 450) (tipologia appartamento)
   (classeEnergetica a) (ristrutturata si) )
   )
 
 (deffacts HOUSES::quartiere-list
-  (quartiere (nomeCitta torino) (nomeQuartiere centro) (servizi scuola metro parco))
-  (quartiere (nomeCitta torino) (nomeQuartiere periferia) (servizi scuola parco))
+  (quartiere (nomeCitta torino) (nomeQuartiere centro) (servizi scuola metro parco palestra))
+  (quartiere (nomeCitta torino) (nomeQuartiere periferia) (servizi scuola parco palestra))
   (quartiere (nomeCitta torino) (nomeQuartiere campagna) (servizi parco))
-  (quartiere (nomeCitta asti) (nomeQuartiere periferia) (servizi scuola))
+  (quartiere (nomeCitta asti) (nomeQuartiere periferia) (servizi scuola palestra))
   (quartiere (nomeCitta asti) (nomeQuartiere campagna) (servizi scuola parco))
   (quartiere (nomeCitta alessandria) (nomeQuartiere centro) (servizi scuola metro parco))
   (quartiere (nomeCitta alessandria) (nomeQuartiere periferia) (servizi scuola parco))
@@ -512,14 +525,14 @@
 (defrule HOUSES::generate-house-like-size
   (attribute (name size) (value ?size) (certainty ?certainty))
   (house (identifier ?id) (metriQuadri ?realsize))
-  (test (and (> ?realsize (- ?size  10))  (< ?realsize (+ ?size  10))))
+  (test (and (>= ?realsize (- ?size  20))  (<= ?realsize (+ ?size  20))))
   =>
   (assert (attribute (name house) (value ?id)
                      (certainty ?certainty))))
 
 (defrule HOUSES::generate-house-like-budget
   (attribute (name budget) (value ?priceChosen) (certainty ?certainty))
-  (house (identifier ?id) (prezzo ?prezzo&:(< ?prezzo ?priceChosen)))
+  (house (identifier ?id) (prezzo ?prezzo&:(<= ?prezzo ?priceChosen)))
   =>
   (assert (attribute (name house) (value ?id)
                      (certainty ?certainty))))
@@ -583,10 +596,19 @@
   =>
   (retract ?h))
 
-(defrule HOUSES::delete-house-like-city
-  (attribute (name budget) (value ?priceChosen))
+(defrule HOUSES::delete-house-like-budget
+  (attribute (name budget) (value ?priceChosen) (certainty ?certainty))
   ?h<-(attribute (name house) (value ?identifier))
-  (not(house (identifier ?identifier) (prezzo ?prezzo&:(< ?prezzo ?priceChosen))))
+  (house (identifier ?identifier) (prezzo ?prezzo))
+  (test  (> ?prezzo ?priceChosen))
+  =>
+  (retract ?h))
+
+(defrule HOUSES::delete-house-like-size
+  (attribute (name size) (value ?size) (certainty ?certainty))
+  ?h<-(attribute (name house) (value ?identifier))
+  (house (identifier ?identifier) (metriQuadri ?realsize))
+  (test (or (< ?realsize (- ?size  20))  (> ?realsize (+ ?size  20))))
   =>
   (retract ?h))
 
@@ -597,10 +619,10 @@
   =>
   (retract ?h))
 
-(defrule HOUSES::delete-house-like-type
+(defrule HOUSES::delete-house-like-boxAuto
   (attribute (name box-auto) (value si))
   ?h<-(attribute (name house) (value ?identifier))
-  (not(house (identifier ?identifier) (boxAuto si)))
+  (house (identifier ?identifier) (boxAuto no))
   =>
   (retract ?h))
 
@@ -623,10 +645,11 @@
 ;;*  PRINT-RESULT  *
 ;;******************
 
-(defmodule PRINT-RESULTS (import MAIN ?ALL))
+(defmodule PRINT-RESULTS (import MAIN ?ALL) (import QUESTIONS ?ALL))
 
 (defrule PRINT-RESULTS::header ""
    (declare (salience 10))
+   (refresh-fact ?val)
    =>
    (printout t "        SELECTED HOUSES"  crlf)
    (printout t " HOUSE                  CERTAINTY" crlf)
@@ -634,20 +657,25 @@
    (assert (phase print-wines)))
 
 (defrule PRINT-RESULTS::print-house ""
+  (refresh-fact ?val)
   ?rem <- (attribute (name house) (value ?id) (certainty ?per))		  
-  (not (attribute (name house) (certainty ?per1&:(> ?per1 ?per))))
+  (attribute (name house) (value ?id) (certainty ?per1&:(> ?per1 20)))
   =>
-  (retract ?rem)
   (format t " %-d %2d%%%n" ?id ?per))
 
-(defrule PRINT-RESULTS::remove-poor-house-choices ""
-  ?rem <- (attribute (name house) (certainty ?per&:(< ?per 20)))
-  =>
-  (retract ?rem))
-
 (defrule PRINT-RESULTS::end-spaces ""
-   (not (attribute (name house)))
+   (declare (salience -10))
+   (refresh-fact ?val)
    =>
    (printout t crlf))
 
+(defrule PRINT-RESULTS::end-computation ""
+  (declare (salience -20))
+  (not (question (precursors) (already-asked FALSE)))
+  (not (question (precursors) (already-asked ~TRUE & ~FALSE)))
+  (not (question-numeric (precursors) (already-asked FALSE)))
+  (not (question-numeric (precursors) (already-asked ~TRUE & ~FALSE)))
+  =>
+  (exit)
+)
 
