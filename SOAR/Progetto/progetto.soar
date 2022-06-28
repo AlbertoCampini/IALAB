@@ -1,0 +1,113 @@
+#Top space
+
+#Objects
+    #Ladder
+    #Tool
+    #Rocks
+    #Sling
+
+sp {ht*propose-space*ht
+  (state <s> -^impasse ^superstate nil)
+  -->
+  (<s> ^name problem-space <p>)
+  (<s> ^problem-space <p>)
+  (<p> ^name robot-problem)
+  (<s> ^tool yes ^ladder yes ^window intact ^position inside)
+}
+
+#Action proposition
+
+sp {ht*propose-op*break-window-with-tool-intact
+  (state <s> ^problem-space.name robot-problem)
+  (<s> ^tool yes  ^ladder yes ^window intact)
+  -->
+  (<s> ^operator <o>)
+  (<o> ^name break-window-tool-intact)
+}
+
+sp {ht*propose-op*break-window-with-tool-damaged
+  (state <s> ^problem-space.name robot-problem)
+  (<s> ^tool yes  ^ladder yes ^window damaged)
+  -->
+  (<s> ^operator <o>)
+  (<o> ^name break-window-tool-damaged)
+}
+
+
+sp {ht*propose-op*escape
+  (state <s> ^problem-space.name robot-problem)
+  (<s> ^ladder yes ^window broken)
+  -->
+  (<s> ^operator <o>)
+  (<o> ^name escape)
+}
+
+
+#Action execution
+
+sp {ht*apply-op*break-window-tool-intact
+  (state <s>  ^operator <o>)
+  (<s> ^window intact)
+  (<o> ^name break-window-tool-intact)
+  -->
+  (write (crlf) |   Hitting intact window with tool    |)
+  (<s> ^window intact - damaged +)
+}
+
+sp {ht*apply-op*break-window-tool-damaged
+  (state <s>  ^operator <o>)
+  (<s> ^window damaged)
+  (<o> ^name break-window-tool-damaged)
+  -->
+  (write (crlf) |   Hitting damaged window with tool    |)
+  (<s> ^window damaged - broken +)
+  }
+
+
+
+sp {ht*terminate*break-window-tool-intact
+  (state <s> ^operator <o>)
+  (<o> ^name break-window-tool-intact)
+  -->
+  (<s> ^operator <o>)
+}
+
+sp {ht*terminate*break-window-tool-damaged
+  (state <s> ^operator <o>)
+  (<o> ^name break-window-tool-damaged)
+  -->
+  (<s> ^operator <o>)
+}
+
+sp {ht*apply-op*escape
+  (state <s>  ^operator <o>)
+  (<o> ^name escape)
+  -->
+  (write (crlf) |   Using ladder to escape    |)
+  (<s> ^position inside - outside +)
+}
+
+sp {ht*terminate*escape
+  (state <s> ^operator <o>)
+  (<o> ^name escape)
+  -->
+  (<s> ^operator <o> )
+}
+
+sp {ht*evaluate*state*success
+  (state <s>)
+  (<s> ^position outside)
+  -->
+  (<s> ^success yes)}
+
+
+
+
+sp {default*top-goal*halt*state*success
+    :default
+  (state <s>) 
+  (<s> ^success yes)
+  -->
+  (write (crlf)  |  Robot is outside, goal reached | )
+  (halt)
+}
