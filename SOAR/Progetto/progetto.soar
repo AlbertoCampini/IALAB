@@ -6,37 +6,53 @@
     #Rocks
     #Sling
 
-sp {ht*propose-space*ht
+sp {rp*propose-space*rp
   (state <s> -^impasse ^superstate nil)
   -->
   (<s> ^name problem-space <p>)
   (<s> ^problem-space <p>)
   (<p> ^name robot-problem)
-  (<s> ^tool yes ^ladder yes ^window intact ^position inside)
+  (<s> ^inventory ladder sling pebbles ^window intact   ^position inside)
 }
 
 #Action proposition
 
-sp {ht*propose-op*break-window-with-tool-intact
+sp {rp*propose-op*break-window-with-tool-intact
   (state <s> ^problem-space.name robot-problem)
-  (<s> ^tool yes  ^ladder yes ^window intact)
+  (<s> ^inventory tool ladder  ^window intact)
   -->
   (<s> ^operator <o>)
   (<o> ^name break-window-tool-intact)
 }
 
-sp {ht*propose-op*break-window-with-tool-damaged
+sp {rp*propose-op*break-window-with-tool-damaged
   (state <s> ^problem-space.name robot-problem)
-  (<s> ^tool yes  ^ladder yes ^window damaged)
+  (<s> ^inventory tool ladder ^window damaged)
   -->
   (<s> ^operator <o>)
   (<o> ^name break-window-tool-damaged)
 }
 
-
-sp {ht*propose-op*escape
+sp {rp*propose-op*break-window-with-sling-intact
   (state <s> ^problem-space.name robot-problem)
-  (<s> ^ladder yes ^window broken)
+  (<s> ^inventory sling pebbles ^window intact)
+  -->
+  (<s> ^operator <o>)
+  (<o> ^name break-window-sling-intact)
+}
+
+sp {rp*propose-op*break-window-with-sling-damaged
+  (state <s> ^problem-space.name robot-problem)
+  (<s> ^inventory sling pebbles ^window damaged)
+  -->
+  (<s> ^operator <o>)
+  (<o> ^name break-window-sling-damaged)
+}
+
+
+sp {rp*propose-op*escape
+  (state <s> ^problem-space.name robot-problem)
+  (<s> ^inventory ladder ^window broken)
   -->
   (<s> ^operator <o>)
   (<o> ^name escape)
@@ -45,63 +61,105 @@ sp {ht*propose-op*escape
 
 #Action execution
 
-sp {ht*apply-op*break-window-tool-intact
+# --- START OF Operations of breaking the window with the tool
+
+sp {rp*apply-op*break-window-tool-intact
   (state <s>  ^operator <o>)
-  (<s> ^window intact)
+  (<s> ^window intact ^inventory tool ladder)
   (<o> ^name break-window-tool-intact)
   -->
   (write (crlf) |   Hitting intact window with tool    |)
   (<s> ^window intact - damaged +)
 }
 
-sp {ht*apply-op*break-window-tool-damaged
+sp {rp*apply-op*break-window-tool-damaged
   (state <s>  ^operator <o>)
-  (<s> ^window damaged)
+  (<s> ^window damaged ^inventory tool ladder)
   (<o> ^name break-window-tool-damaged)
   -->
   (write (crlf) |   Hitting damaged window with tool    |)
   (<s> ^window damaged - broken +)
   }
 
-
-
-sp {ht*terminate*break-window-tool-intact
+sp {rp*terminate*break-window-tool-intact
   (state <s> ^operator <o>)
   (<o> ^name break-window-tool-intact)
   -->
   (<s> ^operator <o>)
 }
 
-sp {ht*terminate*break-window-tool-damaged
+sp {rp*terminate*break-window-tool-damaged
   (state <s> ^operator <o>)
   (<o> ^name break-window-tool-damaged)
   -->
   (<s> ^operator <o>)
 }
 
-sp {ht*apply-op*escape
+# --- END OF Operations of breaking the window with the tool
+
+# --- START OF Operations of breaking the window with the sling
+
+sp {rp*apply-op*break-window-sling-intact
   (state <s>  ^operator <o>)
+  (<s> ^window intact ^inventory sling pebbles)
+  (<o> ^name break-window-sling-intact)
+  -->
+  (write (crlf) |   Hitting intact window with pebble thrown with sling    |)
+  (<s> ^window intact - damaged +)
+}
+
+sp {rp*apply-op*break-window-sling-damaged
+  (state <s>  ^operator <o>)
+  (<s> ^window damaged ^inventory sling pebbles)
+  (<o> ^name break-window-sling-damaged)
+  -->
+  (write (crlf) |  Hitting damaged window with pebble thrown with a sling    |)
+  (<s> ^window damaged - broken +)
+  }
+
+sp {rp*terminate*break-window-sling-intact
+  (state <s> ^operator <o>)
+  (<o> ^name break-window-sling-intact)
+  -->
+  (<s> ^operator <o>)
+}
+
+sp {rp*terminate*break-window-sling-damaged
+  (state <s> ^operator <o>)
+  (<o> ^name break-window-sling-damaged)
+  -->
+  (<s> ^operator <o>)
+}
+
+# --- END OF Operations of breaking the window with the sling
+
+
+# --- START OF Operation escape
+
+sp {rp*apply-op*escape
+  (state <s>  ^operator <o>)
+  (<s> ^inventory ladder)
   (<o> ^name escape)
   -->
   (write (crlf) |   Using ladder to escape    |)
   (<s> ^position inside - outside +)
 }
 
-sp {ht*terminate*escape
+sp {rp*terminate*escape
   (state <s> ^operator <o>)
   (<o> ^name escape)
   -->
   (<s> ^operator <o> )
 }
 
-sp {ht*evaluate*state*success
+# --- END OF Operation escape
+
+
+sp {rp*evaluate*state*success
   (state <s>)
   (<s> ^position outside)
   -->
   (<s> ^success yes)}
-
-
-
 
 sp {default*top-goal*halt*state*success
     :default
