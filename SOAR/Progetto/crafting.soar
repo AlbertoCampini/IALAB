@@ -1,0 +1,131 @@
+#Objects
+    #Log1
+    #Log2
+    #Branch
+    #Rocks
+    #Spring
+
+#Craf
+    #Ladder
+    #Tool
+    #Rocks
+    #Sling
+
+sp {propose*initialize-craft-inventory
+   (state <s> ^superstate nil
+             -^name)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name initialize-available-crafting)
+   (<s> ^objects log1 log2 branch rocks spring ^craft nil)
+}
+
+##
+# Store the available crafting
+# and associated reward on the state
+##
+sp {apply*initialize-available-crafting
+   (state <s> ^operator <op>)
+   (<op> ^name initialize-available-crafting)
+-->
+   (<s> ^name available-crafting
+        ^craft <t1> <t2> <t3> <t4> <t5> <t6> <t7> <t8> <t9> <t10>
+        ^location start)
+   (<t1> ^name ladder ^reward  2)
+   (<t2> ^name tool ^reward 1)
+   (<t3> ^name sling ^reward 1)
+   (<t4> ^name tool ^reward 1)
+}
+
+##
+# Propose crafting any craft available
+##
+sp {available-crafting*propose*craft
+   (state <s> ^name available-crafting
+              ^crafting <t>)
+   (<t> ^name <craft>)
+-->
+   (<s> ^operator <op> +)
+
+}
+
+##
+# Craft ladder
+##
+sp {available-crafting*rl*ladder
+   (state <s> ^name available-crafting
+              ^operator <op> +)
+   (<op> ^name craft
+         ^craf ladder
+         ^objects branch rocks spring)
+-->
+   (<s> ^operator <op> = 0)
+   
+}
+
+##
+# Craft sling
+##
+sp {available-crafting*rl*sling
+   (state <s> ^name available-crafting
+              ^operator <op> +)
+   (<op> ^name craft
+         ^craf sling
+         ^objects log1 log2 rocks)
+-->
+   (<s> ^operator <op> = 0)
+   
+}
+
+##
+# Craft tool
+##
+sp {available-crafting*rl*tool
+   (state <s> ^name available-crafting
+              ^operator <op> +)
+   (<op> ^name craft
+         ^craf sling
+         ^objects log1 log2 spring)
+-->
+   (<s> ^operator <op> = 0)
+   
+}
+
+##
+# When a crafting is chosen:
+# - change location
+# - output choice
+##
+sp {apply*craft
+   (state <s> ^operator <op>
+              ^location start)
+   (<op> ^name move
+         ^dir <dir>)
+-->
+   (<s> ^location start - <dir>)
+   (write (crlf) |Moved: | <dir>)
+}
+
+##
+# When a direction is chosen, assert the associated reward
+##
+sp {elaborate*reward
+   (state <s> ^name left-right
+              ^reward-link <r>
+              ^location <d-name>
+              ^direction <dir>)
+   (<dir> ^name <d-name> ^reward <d-reward>)
+-->
+   (<r> ^reward <rr>)
+   (<rr> ^value <d-reward>)
+}
+
+##
+# When a direction is chosen, halt
+##
+sp {elaborate*done
+   (state <s> ^name left-right
+              ^location {<> start})
+-->
+   (halt)
+}
