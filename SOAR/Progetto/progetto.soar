@@ -115,6 +115,7 @@ sp {rp*rl*intact-weak-point-sling
 sp {rp*propose*break-window-with-sling-damaged
   (state <s> ^problem-space.name robot-problem)
   (<s> ^inventory sling pebbles ^window damaged ^windows-hit-point <d>)
+  (<d> ^name <p>)
   -->
   (<s> ^operator <o> +)
   (<o> ^name break-window-sling-damaged ^point <p>)
