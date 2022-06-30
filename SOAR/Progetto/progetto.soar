@@ -12,41 +12,132 @@ sp {rp*propose-space*rp
   (<s> ^name problem-space <p>)
   (<s> ^problem-space <p>)
   (<p> ^name robot-problem)
-  (<s> ^inventory ladder sling pebbles ^window intact   ^position inside)
+  (<s> ^windows-hit-point <d1> <d2>)
+  (<d1> ^name generic-point ^reward  -1)
+  (<d2> ^name weak-point ^reward 1)
+  (<s> ^inventory sling ladder pebbles ^window intact   ^position inside)
 }
 
 #Action proposition
 
-sp {rp*propose-op*break-window-with-tool-intact
+
+# --- PROPOSE TOOL HIT
+
+sp {rp*propose*break-window-with-tool-intact
   (state <s> ^problem-space.name robot-problem)
-  (<s> ^inventory tool ladder  ^window intact)
+  (<s> ^inventory tool ladder  ^window intact ^windows-hit-point <d>)
+  (<d> ^name <p>)
   -->
-  (<s> ^operator <o>)
-  (<o> ^name break-window-tool-intact)
+  (<s> ^operator <op> +)
+  (<op> ^name break-window-tool-intact
+   ^point <p>)
 }
 
-sp {rp*propose-op*break-window-with-tool-damaged
-  (state <s> ^problem-space.name robot-problem)
-  (<s> ^inventory tool ladder ^window damaged)
-  -->
-  (<s> ^operator <o>)
-  (<o> ^name break-window-tool-damaged)
+#SOAR RL-RULE for intact and generic point
+sp {rp*rl*intact-generic-point
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name break-window-tool-intact
+         ^point generic-point)
+-->
+   (<s> ^operator <op> = 0)
 }
 
-sp {rp*propose-op*break-window-with-sling-intact
-  (state <s> ^problem-space.name robot-problem)
-  (<s> ^inventory sling pebbles ^window intact)
-  -->
-  (<s> ^operator <o>)
-  (<o> ^name break-window-sling-intact)
+#SOAR RL-RULE for intact and weak point
+sp {rp*rl*intact-weak-point
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name break-window-tool-intact
+         ^point weak-point)
+-->
+   (<s> ^operator <op> = 0)
 }
 
-sp {rp*propose-op*break-window-with-sling-damaged
+sp {rp*propose*break-window-with-tool-damaged
   (state <s> ^problem-space.name robot-problem)
-  (<s> ^inventory sling pebbles ^window damaged)
+  (<s> ^inventory tool ladder ^window damaged  ^windows-hit-point <d>)
+  (<d> ^name <p>)
   -->
-  (<s> ^operator <o>)
-  (<o> ^name break-window-sling-damaged)
+  (<s> ^operator <op> +)
+  (<op> ^name break-window-tool-damaged ^point <p>)
+}
+
+#SOAR RL-RULE for damaged and generic point
+sp {rp*rl*damaged-generic-point
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name break-window-tool-damaged
+         ^point generic-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+#SOAR RL-RULE for damaged and weak point
+sp {rp*rl*damaged-weak-point
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name break-window-tool-damaged
+         ^point weak-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+# --- PROPOSE SLING HIT
+
+sp {rp*propose*break-window-with-sling-intact
+  (state <s> ^problem-space.name robot-problem)
+  (<s> ^inventory sling pebbles ^window intact ^windows-hit-point <d>)
+  (<d> ^name <p>)
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name break-window-sling-intact ^point <p>)
+}
+
+#SOAR RL-RULE for damaged and generic point
+sp {rp*rl*intact-generic-point-sling
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name break-window-sling-intact
+         ^point generic-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+#SOAR RL-RULE for damaged and weak point
+sp {rp*rl*intact-weak-point-sling
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name break-window-sling-intact
+         ^point weak-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+sp {rp*propose*break-window-with-sling-damaged
+  (state <s> ^problem-space.name robot-problem)
+  (<s> ^inventory sling pebbles ^window damaged ^windows-hit-point <d>)
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name break-window-sling-damaged ^point <p>)
+}
+
+#SOAR RL-RULE for damaged and generic point
+sp {rp*rl*damaged-generic-point-sling
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name break-window-sling-damaged
+         ^point generic-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+#SOAR RL-RULE for damaged and weak point
+sp {rp*rl*damaged-weak-point-sling
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name break-window-sling-damaged
+         ^point weak-point)
+-->
+   (<s> ^operator <op> = 0)
 }
 
 
@@ -63,23 +154,45 @@ sp {rp*propose-op*escape
 
 # --- START OF Operations of breaking the window with the tool
 
-sp {rp*apply-op*break-window-tool-intact
+sp {rp*apply-op*break-window-tool-intact-generic-point
   (state <s>  ^operator <o>)
   (<s> ^window intact ^inventory tool ladder)
-  (<o> ^name break-window-tool-intact)
+  (<o> ^name break-window-tool-intact ^point generic-point)
   -->
-  (write (crlf) |   Hitting intact window with tool    |)
-  (<s> ^window intact - damaged +)
+  (write (crlf) |   Hitting intact window with tool in a generic point   |)
+  #(<s> ^window intact - damaged +)
+  (write (crlf) |   Nothing happened...                                   |)
 }
 
-sp {rp*apply-op*break-window-tool-damaged
+sp {rp*apply-op*break-window-tool-intact-weak-point
+  (state <s>  ^operator <o>)
+  (<s> ^window intact ^inventory tool ladder)
+  (<o> ^name break-window-tool-intact ^point weak-point)
+  -->
+  (write (crlf) |   Hitting intact window with tool in the weak point   |)
+  (<s> ^window intact - damaged +)
+  (write (crlf) |   The window has been damaged                         |)
+}
+
+sp {rp*apply-op*break-window-tool-damaged-generic-point
   (state <s>  ^operator <o>)
   (<s> ^window damaged ^inventory tool ladder)
-  (<o> ^name break-window-tool-damaged)
+  (<o> ^name break-window-tool-damaged ^point generic-point)
   -->
-  (write (crlf) |   Hitting damaged window with tool    |)
+  (write (crlf) |   Hitting damaged window with tool in a generic point   |)
+  #(<s> ^window intact - damaged +)
+  (write (crlf) |   Nothing happened...                                   |)
+}
+
+sp {rp*apply-op*break-window-tool-damaged-weak-point
+  (state <s>  ^operator <o>)
+  (<s> ^window damaged ^inventory tool ladder)
+  (<o> ^name break-window-tool-damaged ^point weak-point)
+  -->
+  (write (crlf) |   Hitting damaged window with tool in the weak point   |)
   (<s> ^window damaged - broken +)
-  }
+  (write (crlf) |   The window broke                                     |)
+}
 
 sp {rp*terminate*break-window-tool-intact
   (state <s> ^operator <o>)
@@ -99,22 +212,45 @@ sp {rp*terminate*break-window-tool-damaged
 
 # --- START OF Operations of breaking the window with the sling
 
-sp {rp*apply-op*break-window-sling-intact
+sp {rp*apply-op*break-window-sling-intact-generic
   (state <s>  ^operator <o>)
   (<s> ^window intact ^inventory sling pebbles)
-  (<o> ^name break-window-sling-intact)
+  (<o> ^name break-window-sling-intact ^point generic-point)
   -->
-  (write (crlf) |   Hitting intact window with pebble thrown with sling    |)
-  (<s> ^window intact - damaged +)
+  (write (crlf) |   Hitting intact window with pebble thrown with sling in generic point    |)
+  #(<s> ^window intact - damaged +)
+   (write (crlf) |   Nothing happened...                                                    |)
 }
 
-sp {rp*apply-op*break-window-sling-damaged
+sp {rp*apply-op*break-window-sling-intact-weak
   (state <s>  ^operator <o>)
-  (<s> ^window damaged ^inventory sling pebbles)
+  (<s> ^window intact ^inventory sling pebbles)
+  (<o> ^name break-window-sling-intact ^point weak-point)
+  -->
+  (write (crlf) |   Hitting intact window with pebble thrown with sling in a weak point    |)
+  (<s> ^window intact - damaged +)
+   (write (crlf) |   The window got damaged                                                |)
+}
+
+
+sp {rp*apply-op*break-window-sling-damaged-generic
+  (state <s>  ^operator <o>)
+  (<s> ^window damaged ^inventory sling pebbles  ^point generic-point)
   (<o> ^name break-window-sling-damaged)
   -->
-  (write (crlf) |  Hitting damaged window with pebble thrown with a sling    |)
+  (write (crlf) |  Hitting damaged window with pebble thrown with a sling in generic point    |)
+  #(<s> ^window damaged - broken +)
+  (write (crlf) |   Nothing happened...                                                    |)
+  }
+
+sp {rp*apply-op*break-window-sling-damaged-weak
+  (state <s>  ^operator <o>)
+  (<s> ^window damaged ^inventory sling pebbles)
+  (<o> ^name break-window-sling-damaged ^point weak-point)
+  -->
+  (write (crlf) |  Hitting damaged window with pebble thrown with a sling in weak point   |)
   (<s> ^window damaged - broken +)
+  (write (crlf) |   The window broke                                                      |)
   }
 
 sp {rp*terminate*break-window-sling-intact
@@ -132,7 +268,6 @@ sp {rp*terminate*break-window-sling-damaged
 }
 
 # --- END OF Operations of breaking the window with the sling
-
 
 # --- START OF Operation escape
 
@@ -155,6 +290,18 @@ sp {rp*terminate*escape
 # --- END OF Operation escape
 
 
+# --- ELABORATING REWARD OF ACTIONS
+sp {elaborate*reward
+   (state <s> ^problem-space.name robot-problem
+              ^reward-link <r>
+              ^windows-hit-point <h>
+              ^operator <o>)
+   (<o> ^point <h>) 
+-->
+   (<r> ^reward <rr>)
+   (<rr> ^value <d-reward>)
+}
+
 sp {rp*evaluate*state*success
   (state <s>)
   (<s> ^position outside)
@@ -169,3 +316,5 @@ sp {default*top-goal*halt*state*success
   (write (crlf)  |  Robot is outside, goal reached | )
   (halt)
 }
+
+
