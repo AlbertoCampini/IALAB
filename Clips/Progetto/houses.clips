@@ -4,6 +4,13 @@
 ;;*    MAIN      *
 ;;****************
 
+;SALIENCE
+;100 Max importance
+;50 High importance
+;30 Medium importance
+;-30 Low importance
+;-50 High unimportance
+
 ;Function to ask a question with a list of allowed values
 ;If the answer is != from unknown we set the question as already asked
 ;Otherwise we bind it with a random id to signify that is already been asked
@@ -80,9 +87,26 @@
 (deffacts QUESTIONS:question-number
    (number-of-questions 0)
 )
+
+;Rule to clear the unknown attributes    
+(defrule QUESTIONS::clear-unknown-value
+   (declare (salience 100))
+   ?a <- (attribute (value unknown))
+   =>
+   (retract ?a)
+)
+
+;Rule to clear the unknown attributes    
+(defrule QUESTIONS::clear-unknown-value-numeric
+   (declare (salience 100))
+   ?a <- (attribute (value -1))
+   =>
+   (retract ?a)
+)
+
 ;Rule used to check when we asked 5 questions and then move to the next phase
 (defrule QUESTIONS::limit-questions
-   (declare (salience 200))
+   (declare (salience 100))
    ?f <- (number-of-questions ?number & 5)
 =>
    (retract ?f)
@@ -112,7 +136,7 @@
 
 ;Rule to ask a new question, has more importance than the already asked ones
 (defrule QUESTIONS::ask-a-new-question
-   (declare (salience 100))
+   (declare (salience 30))
    ?f <- (question (already-asked FALSE)
                    (precursors)
                    (the-question ?the-question)
@@ -130,7 +154,7 @@
 
 ;Rule to ask a already asked question
 (defrule QUESTIONS::re-ask-a-question
-   (declare (salience 50))
+   (declare (salience -30))
    ?f <- (question (already-asked ~TRUE & ~FALSE)
                    (precursors)
                    (the-question ?the-question)
@@ -152,7 +176,7 @@
 
 ;Rule to ask a new question, has more importance than the already asked ones
 (defrule QUESTIONS::ask-a-new-question-numeric
-   (declare (salience 150))
+   (declare (salience 50))
    ?f <- (question-numeric (already-asked FALSE)
                    (precursors)
                    (the-question ?the-question)
@@ -169,7 +193,7 @@
 
 ;Rule to ask a already asked question
 (defrule QUESTIONS::re-ask-a-question-numeric
-   (declare (salience 50))
+   (declare (salience -30))
    ?f <- (question-numeric  (already-asked ~TRUE & ~FALSE)
                    (precursors)
                    (the-question ?the-question)
@@ -185,24 +209,8 @@
    (retract ?number)
 )
 
-;Rule to clear the unknown attributes    
-(defrule QUESTIONS::clear-unknown-value
-   (declare (salience 300))
-   ?a <- (attribute (value unknown))
-   =>
-   (retract ?a)
-)
-
-;Rule to clear the unknown attributes    
-(defrule QUESTIONS::clear-unknown-value-numeric
-   (declare (salience 300))
-   ?a <- (attribute (value -1))
-   =>
-   (retract ?a)
-)
-
 (defrule  QUESTIONS::clear-focus-MAIN
-  (declare (salience -100))
+  (declare (salience -50))
   =>
   (focus MAIN)
 )
@@ -648,7 +656,7 @@
 (defmodule PRINT-RESULTS (import MAIN ?ALL) (import QUESTIONS ?ALL))
 
 (defrule PRINT-RESULTS::header ""
-   (declare (salience 10))
+   (declare (salience 100))
    (refresh-fact ?val)
    =>
    (printout t "        SELECTED HOUSES"  crlf)
@@ -670,7 +678,7 @@
    (printout t crlf))
 
 (defrule PRINT-RESULTS::end-computation ""
-  (declare (salience -20))
+  (declare (salience -50))
   (not (question (precursors) (already-asked FALSE)))
   (not (question (precursors) (already-asked ~TRUE & ~FALSE)))
   (not (question-numeric (precursors) (already-asked FALSE)))
