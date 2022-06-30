@@ -15,7 +15,7 @@ sp {rp*propose-space*rp
   (<s> ^windows-hit-point <d1> <d2>)
   (<d1> ^name generic-point ^reward  -1)
   (<d2> ^name weak-point ^reward 1)
-  (<s> ^inventory sling ladder pebbles ^window intact   ^position inside)
+  (<s> ^inventory tool ladder pebbles ^window intact   ^position inside)
 }
 
 #Action proposition
@@ -297,7 +297,8 @@ sp {elaborate*reward
               ^reward-link <r>
               ^windows-hit-point <h>
               ^operator <o>)
-   (<o> ^point <h>) 
+   (<o> ^point <p>) 
+   (<h> ^name <p> ^reward  <d-reward>)
 -->
    (<r> ^reward <rr>)
    (<rr> ^value <d-reward>)
