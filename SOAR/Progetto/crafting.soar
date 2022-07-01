@@ -16,8 +16,10 @@ sp {rp*propose-space*rp
   -->
   (<s> ^name problem-space <p> ^desired <d>)
   (<s> ^problem-space <p>)
+  (<s> ^phase craft)
   (<s> ^craft <t1> <t2> <t3> <t4> <t5> <t6> <t7>)
   (<d> ^position outside)
+
   (<t1> ^name ladder ^reward 2)
   (<t2> ^name tool ^reward 1)
   (<t3> ^name sling ^reward 1)
@@ -37,8 +39,17 @@ sp {rp*propose-op*crafting-ladder
   (state <s> ^problem-space.name robot-problem)
   (<s> ^inventory log1 log2 )
   -->
-  (<s> ^operator <o>)
+  (<s> ^operator <o> +)
   (<o> ^name crafting-ladder)
+}
+
+sp {rp*rl*crafting-ladder
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name crafting-ladder
+         ^craft ladder)
+-->
+   (<s> ^operator <op> = 0)
 }
 
 sp {rp*apply-op*crafting-ladder
@@ -61,6 +72,15 @@ sp {rp*propose-op*crafting-sling
   (<o> ^name crafting-sling)
 }
 
+sp {rp*rl*crafting-sling
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name crafting-sling
+         ^craft sling)
+-->
+   (<s> ^operator <op> = 0)
+}
+
 sp {rp*apply-op*crafting-sling
   (state <s> ^operator <o>)
   (<s> ^inventory spring branch)
@@ -79,6 +99,15 @@ sp {rp*propose-op*crafting-tool
   -->
   (<s> ^operator <o>)
   (<o> ^name crafting-tool)
+}
+
+sp {rp*rl*crafting-tool
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name crafting-tool
+         ^craft tool)
+-->
+   (<s> ^operator <op> = 0)
 }
 
 sp {rp*apply-op*crafting-tool
@@ -101,6 +130,15 @@ sp {rp*propose-op*crafting-ladder
   (<o> ^name crafting-ladder)
 }
 
+sp {rp*rl*crafting-ladder
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name crafting-ladder
+         ^craft ladder)
+-->
+   (<s> ^operator <op> = 0)
+}
+
 sp {rp*apply-op*crafting-ladder
   (state <s>  ^operator <o>)
   (<s> ^inventory log1 log2)
@@ -119,6 +157,15 @@ sp {rp*propose-op*crafting-spring-rocks
   -->
   (<s> ^operator <o>)
   (<o> ^name crafting-spring-rocks)
+}
+
+sp {rp*rl*crafting-spring-rocks
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name crafting-spring-rocks
+         ^craft spring-rocks)
+-->
+   (<s> ^operator <op> = 0)
 }
 
 sp {rp*apply-op*crafting-spring-rocks
@@ -141,6 +188,15 @@ sp {rp*propose-op*crafting-log-spring
   (<o> ^name crafting-log-spring)
 }
 
+sp {rp*rl*crafting-log-spring
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name crafting-log-spring
+         ^craft log-spring)
+-->
+   (<s> ^operator <op> = 0)
+}
+
 sp {rp*apply-op*crafting-log-spring
   (state <s>  ^operator <o>)
   (<s> ^inventory log1 spring)
@@ -161,6 +217,15 @@ sp {rp*propose-op*crafting-log-rocks
   (<o> ^name crafting-log-rocks)
 }
 
+sp {rp*rl*crafting-log-rocks
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name crafting-log-rocks
+         ^craft log-rocks)
+-->
+   (<s> ^operator <op> = 0)
+}
+
 sp {rp*apply-op*crafting-log-rocks
   (state <s>  ^operator <o>)
   (<s> ^inventory log1 rocks)
@@ -179,6 +244,15 @@ sp {rp*propose-op*crafting-log-branch
   -->
   (<s> ^operator <o>)
   (<o> ^name crafting-log-branch)
+}
+
+sp {rp*rl*crafting-log-branch
+   (state <s> ^problem-space.name robot-problem
+              ^operator <op> +)
+   (<op> ^name crafting-log-branch
+         ^craft log-branch)
+-->
+   (<s> ^operator <op> = 0)
 }
 
 sp {rp*apply-op*crafting-log-branch
