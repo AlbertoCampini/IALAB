@@ -11,11 +11,11 @@ sp {rp*propose-space*rp
   -->
   (<s> ^name problem-space <p>)
   (<s> ^problem-space <p>)
-  (<p> ^name robot-problem)
+  (<p> ^name robot-problem-action)
   (<s> ^windows-hit-point <d1> <d2>)
   (<d1> ^name generic-point ^reward  -1)
   (<d2> ^name weak-point ^reward 1)
-  (<s> ^inventory tool ladder pebbles ^window intact   ^position inside)
+  (<s> ^inventory tool ladder ^window intact ^position inside)
 }
 
 #Action proposition
@@ -23,8 +23,8 @@ sp {rp*propose-space*rp
 
 # --- PROPOSE TOOL HIT
 
-sp {rp*propose*break-window-with-tool-intact
-  (state <s> ^problem-space.name robot-problem)
+sp {rp*propose-op*break-window-with-tool-intact
+  (state <s> ^problem-space.name robot-problem-action)
   (<s> ^inventory tool ladder  ^window intact ^windows-hit-point <d>)
   (<d> ^name <p>)
   -->
@@ -35,7 +35,7 @@ sp {rp*propose*break-window-with-tool-intact
 
 #SOAR RL-RULE for intact and generic point
 sp {rp*rl*intact-generic-point
-   (state <s> ^problem-space.name robot-problem
+   (state <s> ^problem-space.name robot-problem-action
               ^operator <op> +)
    (<op> ^name break-window-tool-intact
          ^point generic-point)
@@ -45,7 +45,7 @@ sp {rp*rl*intact-generic-point
 
 #SOAR RL-RULE for intact and weak point
 sp {rp*rl*intact-weak-point
-   (state <s> ^problem-space.name robot-problem
+   (state <s> ^problem-space.name robot-problem-action
               ^operator <op> +)
    (<op> ^name break-window-tool-intact
          ^point weak-point)
@@ -53,8 +53,8 @@ sp {rp*rl*intact-weak-point
    (<s> ^operator <op> = 0)
 }
 
-sp {rp*propose*break-window-with-tool-damaged
-  (state <s> ^problem-space.name robot-problem)
+sp {rp*propose-op*break-window-with-tool-damaged
+  (state <s> ^problem-space.name robot-problem-action)
   (<s> ^inventory tool ladder ^window damaged  ^windows-hit-point <d>)
   (<d> ^name <p>)
   -->
@@ -64,7 +64,7 @@ sp {rp*propose*break-window-with-tool-damaged
 
 #SOAR RL-RULE for damaged and generic point
 sp {rp*rl*damaged-generic-point
-   (state <s> ^problem-space.name robot-problem
+   (state <s> ^problem-space.name robot-problem-action
               ^operator <op> +)
    (<op> ^name break-window-tool-damaged
          ^point generic-point)
@@ -73,7 +73,7 @@ sp {rp*rl*damaged-generic-point
 }
 #SOAR RL-RULE for damaged and weak point
 sp {rp*rl*damaged-weak-point
-   (state <s> ^problem-space.name robot-problem
+   (state <s> ^problem-space.name robot-problem-action
               ^operator <op> +)
    (<op> ^name break-window-tool-damaged
          ^point weak-point)
@@ -83,8 +83,8 @@ sp {rp*rl*damaged-weak-point
 
 # --- PROPOSE SLING HIT
 
-sp {rp*propose*break-window-with-sling-intact
-  (state <s> ^problem-space.name robot-problem)
+sp {rp*propose-op*break-window-with-sling-intact
+  (state <s> ^problem-space.name robot-problem-action)
   (<s> ^inventory sling pebbles ^window intact ^windows-hit-point <d>)
   (<d> ^name <p>)
   -->
@@ -94,7 +94,7 @@ sp {rp*propose*break-window-with-sling-intact
 
 #SOAR RL-RULE for damaged and generic point
 sp {rp*rl*intact-generic-point-sling
-   (state <s> ^problem-space.name robot-problem
+   (state <s> ^problem-space.name robot-problem-action
               ^operator <op> +)
    (<op> ^name break-window-sling-intact
          ^point generic-point)
@@ -104,7 +104,7 @@ sp {rp*rl*intact-generic-point-sling
 
 #SOAR RL-RULE for damaged and weak point
 sp {rp*rl*intact-weak-point-sling
-   (state <s> ^problem-space.name robot-problem
+   (state <s> ^problem-space.name robot-problem-action
               ^operator <op> +)
    (<op> ^name break-window-sling-intact
          ^point weak-point)
@@ -112,8 +112,8 @@ sp {rp*rl*intact-weak-point-sling
    (<s> ^operator <op> = 0)
 }
 
-sp {rp*propose*break-window-with-sling-damaged
-  (state <s> ^problem-space.name robot-problem)
+sp {rp*propose-op*break-window-with-sling-damaged
+  (state <s> ^problem-space.name robot-problem-action)
   (<s> ^inventory sling pebbles ^window damaged ^windows-hit-point <d>)
   (<d> ^name <p>)
   -->
@@ -123,7 +123,7 @@ sp {rp*propose*break-window-with-sling-damaged
 
 #SOAR RL-RULE for damaged and generic point
 sp {rp*rl*damaged-generic-point-sling
-   (state <s> ^problem-space.name robot-problem
+   (state <s> ^problem-space.name robot-problem-action
               ^operator <op> +)
    (<op> ^name break-window-sling-damaged
          ^point generic-point)
@@ -133,7 +133,7 @@ sp {rp*rl*damaged-generic-point-sling
 
 #SOAR RL-RULE for damaged and weak point
 sp {rp*rl*damaged-weak-point-sling
-   (state <s> ^problem-space.name robot-problem
+   (state <s> ^problem-space.name robot-problem-action
               ^operator <op> +)
    (<op> ^name break-window-sling-damaged
          ^point weak-point)
@@ -143,7 +143,7 @@ sp {rp*rl*damaged-weak-point-sling
 
 
 sp {rp*propose-op*escape
-  (state <s> ^problem-space.name robot-problem)
+  (state <s> ^problem-space.name robot-problem-action)
   (<s> ^inventory ladder ^window broken)
   -->
   (<s> ^operator <o>)
@@ -293,7 +293,7 @@ sp {rp*terminate*escape
 
 # --- ELABORATING REWARD OF ACTIONS
 sp {elaborate*reward
-   (state <s> ^problem-space.name robot-problem
+   (state <s> ^problem-space.name robot-problem-action
               ^reward-link <r>
               ^windows-hit-point <h>
               ^operator <o>)

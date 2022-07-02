@@ -1,0 +1,651 @@
+#Objects
+    #Log1
+    #Log2
+    #Branch
+    #Rocks
+    #Spring
+
+#Craf
+    #Ladder
+    #Tool
+    #Rocks
+    #Sling
+
+sp {rp*propose-space*rp
+  (state <s> -^impasse ^superstate nil)
+  -->
+  (<s> ^name problem-space <p>)
+  (<s> ^problem-space <p>)
+  (<s> ^phase craft)
+  (<s> ^window intact)
+  (<s> ^position inside)
+  (<s> ^craft <t1> <t2> <t3> <t4> <t5> <t6> <t7>)
+ 
+
+  (<t1> ^name ladder ^reward 2)
+  (<t2> ^name tool ^reward 1)
+  (<t3> ^name sling ^reward 1)
+  (<t4> ^name log-branch ^reward -1)
+  (<t5> ^name log-spring ^reward -1)
+  (<t6> ^name log-rocks ^reward -1)
+  (<t7> ^name spring-rocks ^reward -1)
+
+  (<s> ^windows-hit-point <d1> <d2>)
+
+  (<d1> ^name generic-point ^reward  -1)
+  (<d2> ^name weak-point ^reward 1)
+
+  (<p> ^name robot-problem)
+  (<s> ^inventory log1 log2 branch spring rocks)
+}
+#-------------------------------------------
+#------------ CRAFTING SECTION  ------------
+#-------------------------------------------
+
+##
+# Craft ladder
+##
+sp {rp*propose-op*crafting-ladder
+  (state <s> ^problem-space.name robot-problem ^phase craft)
+  (<s> ^inventory log1 log2 )
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name crafting-ladder ^craft ladder)
+}
+
+sp {rp*rl*crafting-ladder
+   (state <s> ^problem-space.name robot-problem ^phase craft
+              ^operator <op> +)
+   (<op> ^name crafting-ladder
+         ^craft ladder)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+sp {rp*apply-op*crafting-ladder
+  (state <s>  ^operator <o>)
+  (<s> ^inventory log1 log2)
+  (<o> ^name crafting-ladder)
+  -->
+  (write (crlf) |       Craft a ladder using 2 log        |)
+  (<s> ^inventory log1 - log2 - ladder +)
+}
+
+sp {rp*terminate*crafting-ladder
+  (state <s> ^operator <o> ^inventory ladder)
+  (<o> ^name crafting-ladder
+         ^craft ladder)
+  -->
+  (<s> ^operator <o>)
+}
+
+##
+# Craft sling
+##
+sp {rp*propose-op*crafting-sling
+  (state <s> ^problem-space.name robot-problem ^phase craft)
+  (<s> ^inventory spring branch )
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name crafting-sling ^craft sling)
+}
+
+sp {rp*rl*crafting-sling
+   (state <s> ^problem-space.name robot-problem ^phase craft
+              ^operator <op> +)
+   (<op> ^name crafting-sling
+         ^craft sling)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+sp {rp*apply-op*crafting-sling
+  (state <s> ^operator <o> ) 
+  (<s> ^inventory spring branch)
+  (<o> ^name crafting-sling ^craft sling)
+  -->
+  (write (crlf) |   Craft a sling using branch and spring    |)
+  (<s> ^inventory spring - branch - sling +)
+}
+
+sp {rp*terminate*crafting-sling
+  (state <s> ^operator <o> ^inventory sling)
+  (<o> ^name crafting-sling ^craft sling)
+  -->
+  (<s> ^operator <o>)
+}
+
+##
+# Craft tool
+##
+sp {rp*propose-op*crafting-tool
+  (state <s> ^problem-space.name robot-problem ^phase craft)
+  (<s> ^inventory rocks branch)
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name crafting-tool ^craft tool)
+}
+
+sp {rp*rl*crafting-tool
+   (state <s> ^problem-space.name robot-problem ^phase craft
+              ^operator <op> +)
+   (<op> ^name crafting-tool
+         ^craft tool)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+sp {rp*apply-op*crafting-tool
+  (state <s>  ^operator <o>)
+  (<s> ^inventory spring branch)
+  (<o> ^name crafting-tool ^craft tool)
+  -->
+  (write (crlf) |   Craft a tool using branch and rocks    |)
+  (<s> ^inventory rocks - branch - tool +)
+}
+
+sp {rp*terminate*crafting-tool
+  (state <s> ^operator <o> ^inventory tool)
+  (<o> ^name crafting-tool ^craft tool)
+  -->
+  (<s> ^operator <o>)
+}
+
+##
+# Craft spring-rocks
+##
+sp {rp*propose-op*crafting-spring-rocks
+  (state <s> ^problem-space.name robot-problem ^phase craft)
+  (<s> ^inventory rocks spring)
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name crafting-spring-rocks ^craft spring-rocks)
+}
+
+sp {rp*rl*crafting-spring-rocks
+   (state <s> ^problem-space.name robot-problem ^phase craft
+              ^operator <op> +)
+   (<op> ^name crafting-spring-rocks
+         ^craft spring-rocks)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+sp {rp*apply-op*crafting-spring-rocks
+  (state <s>  ^operator <o>)
+  (<s> ^inventory rocks spring)
+  (<o> ^name crafting-spring-rocks ^craft spring-rocks)
+  -->
+  (write (crlf) |     Craft nothing using log and spring     |)
+  (<s> ^inventory rocks - spring - spring-rocks + )
+}
+
+sp {rp*terminate*crafting-spring-rocks
+  (state <s> ^operator <o> ^inventory spring-rocks)
+   (<o> ^name crafting-spring-rocks ^craft spring-rocks)
+  -->
+  (<s> ^operator <o>)
+}
+
+##
+# Craft log-spring
+##
+sp {rp*propose-op*crafting-log-spring
+  (state <s> ^problem-space.name robot-problem ^phase craft)
+  (<s> ^inventory log1 spring)
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name crafting-log-spring ^craft log-spring)
+}
+
+sp {rp*rl*crafting-log-spring
+   (state <s> ^problem-space.name robot-problem ^phase craft
+              ^operator <op> +)
+   (<op> ^name crafting-log-spring
+         ^craft log-spring)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+sp {rp*apply-op*crafting-log-spring
+  (state <s>  ^operator <o>)
+  (<s> ^inventory log1 spring)
+  (<o> ^name crafting-log-spring ^craft log-spring)
+  -->
+  (write (crlf) |      Craft nothing using log and spring     |)
+  (<s> ^inventory log1 - spring - log-spring +)
+}
+
+sp {rp*terminate*crafting-log-spring
+  (state <s> ^operator <o> ^inventory log-spring)
+   (<o> ^name crafting-log-spring ^craft log-spring)
+  -->
+  (<s> ^operator <o>)
+}
+
+
+##
+# Craft log-rocks
+##
+sp {rp*propose-op*crafting-log-rocks
+  (state <s> ^problem-space.name robot-problem ^phase craft)
+  (<s> ^inventory log1 rocks)
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name crafting-log-rocks  ^craft log-rocks)
+}
+
+sp {rp*rl*crafting-log-rocks
+   (state <s> ^problem-space.name robot-problem ^phase craft
+              ^operator <op> +)
+   (<op> ^name crafting-log-rocks
+         ^craft log-rocks)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+sp {rp*apply-op*crafting-log-rocks
+  (state <s>  ^operator <o>)
+  (<s> ^inventory log1 rocks)
+  (<o> ^name crafting-log-rocks  ^craft log-rocks)
+  -->
+  (write (crlf) |      Craft nothing using log and rocks     |)
+  (<s> ^inventory log1 - rocks - log-rocks +)
+}
+
+sp {rp*terminate*crafting-log-rocks
+  (state <s> ^operator <o> ^inventory log-rocks)
+   (<o> ^name crafting-log-rocks  ^craft log-rocks)
+  -->
+  (<s> ^operator <o>)
+}
+
+##
+# Craft log-branch
+##
+sp {rp*propose-op*crafting-log-branch
+  (state <s> ^problem-space.name robot-problem ^phase craft)
+  (<s> ^inventory log1 branch)
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name crafting-log-branch ^craft log-branch)
+}
+
+sp {rp*rl*crafting-log-branch
+   (state <s> ^problem-space.name robot-problem ^phase craft
+              ^operator <op> +)
+   (<op> ^name crafting-log-branch
+         ^craft log-branch)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+sp {rp*apply-op*crafting-log-branch
+  (state <s> ^operator <o>)
+  (<s> ^inventory log1 branch)
+  (<o> ^name crafting-log-branch ^craft log-branch)
+  -->
+  (write (crlf) |      Craft nothing using log and branch     |)
+  (<s> ^inventory log1 - branch - log-branch +)
+}
+
+sp {rp*terminate*crafting-log-branch
+  (state <s> ^operator <o> ^inventory log-branch)
+  (<o> ^name crafting-log-branch ^craft log-branch)
+  -->
+  (<s> ^operator <o>)
+}
+
+sp {elaborate*reward
+   (state <s>  ^problem-space.name robot-problem ^phase craft
+              ^reward-link <r>
+              ^craft <t>
+              ^operator <o>)
+    (<o> ^craft <cr>)
+    (<t> ^name <cr> ^reward <d-reward>) 
+-->
+   (<r> ^reward <rr>)
+   (<rr> ^value <d-reward>)
+}
+
+
+#Change phase section 
+
+##
+# Change phase with tool and ladder
+##
+sp {rp*propose-op*change-phase-tool-ladder
+  (state <s> ^problem-space.name robot-problem ^phase craft)
+  (<s> ^inventory tool ladder)
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name move-to-next-phase)
+}
+
+sp {rp*propose-op*change-phase-sling-ladder
+  (state <s> ^problem-space.name robot-problem ^phase craft)
+  (<s> ^inventory sling ladder)
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name move-to-next-phase)
+}
+
+sp {rp*apply-op*move-to-next-phase
+  (state <s>  ^operator <o>)
+  (<o> ^name move-to-next-phase)
+  -->
+  (<s> ^phase craft - action +)
+}
+
+sp {rp*terminate*move-to-next-phase
+  (state <s> ^operator <o> ^phase action)
+   (<o> ^name move-to-next-phase)
+  -->
+  (<s> ^operator <o>)
+}
+
+#-------------------------------------------
+#------------ ACTION SECTION    ------------
+#-------------------------------------------
+
+
+#Action proposition
+
+
+# --- PROPOSE TOOL HIT
+
+sp {rp*propose-op*break-window-with-tool-intact
+  (state <s> ^problem-space.name robot-problem ^phase action)
+  (<s> ^inventory tool ladder  ^window intact ^windows-hit-point <d>)
+  (<d> ^name <p>)
+  -->
+  (<s> ^operator <op> +)
+  (<op> ^name break-window-tool-intact
+   ^point <p>)
+}
+
+#SOAR RL-RULE for intact and generic point
+sp {rp*rl*intact-generic-point
+   (state <s> ^problem-space.name robot-problem ^phase action
+              ^operator <op> +)
+   (<op> ^name break-window-tool-intact
+         ^point generic-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+#SOAR RL-RULE for intact and weak point
+sp {rp*rl*intact-weak-point
+   (state <s> ^problem-space.name robot-problem ^phase action
+              ^operator <op> +)
+   (<op> ^name break-window-tool-intact
+         ^point weak-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+sp {rp*propose-op*break-window-with-tool-damaged
+  (state <s> ^problem-space.name robot-problem ^phase action)
+  (<s> ^inventory tool ladder ^window damaged  ^windows-hit-point <d>)
+  (<d> ^name <p>)
+  -->
+  (<s> ^operator <op> +)
+  (<op> ^name break-window-tool-damaged ^point <p>)
+}
+
+#SOAR RL-RULE for damaged and generic point
+sp {rp*rl*damaged-generic-point
+   (state <s> ^problem-space.name robot-problem ^phase action
+              ^operator <op> +)
+   (<op> ^name break-window-tool-damaged
+         ^point generic-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+#SOAR RL-RULE for damaged and weak point
+sp {rp*rl*damaged-weak-point
+   (state <s> ^problem-space.name robot-problem ^phase action
+              ^operator <op> +)
+   (<op> ^name break-window-tool-damaged
+         ^point weak-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+# --- PROPOSE SLING HIT
+
+sp {rp*propose-op*break-window-with-sling-intact
+  (state <s> ^problem-space.name robot-problem ^phase action)
+  (<s> ^inventory sling rocks ^window intact ^windows-hit-point <d>)
+  (<d> ^name <p>)
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name break-window-sling-intact ^point <p>)
+}
+
+#SOAR RL-RULE for damaged and generic point
+sp {rp*rl*intact-generic-point-sling
+   (state <s> ^problem-space.name robot-problem ^phase action
+              ^operator <op> +)
+   (<op> ^name break-window-sling-intact
+         ^point generic-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+#SOAR RL-RULE for damaged and weak point
+sp {rp*rl*intact-weak-point-sling
+   (state <s> ^problem-space.name robot-problem ^phase action
+              ^operator <op> +)
+   (<op> ^name break-window-sling-intact
+         ^point weak-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+sp {rp*propose-op*break-window-with-sling-damaged
+  (state <s> ^problem-space.name robot-problem ^phase action)
+  (<s> ^inventory sling rocks ^window damaged ^windows-hit-point <d>)
+  (<d> ^name <p>)
+  -->
+  (<s> ^operator <o> +)
+  (<o> ^name break-window-sling-damaged ^point <p>)
+}
+
+#SOAR RL-RULE for damaged and generic point
+sp {rp*rl*damaged-generic-point-sling
+   (state <s> ^problem-space.name robot-problem ^phase action
+              ^operator <op> +)
+   (<op> ^name break-window-sling-damaged
+         ^point generic-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+#SOAR RL-RULE for damaged and weak point
+sp {rp*rl*damaged-weak-point-sling
+   (state <s> ^problem-space.name robot-problem ^phase action
+              ^operator <op> +)
+   (<op> ^name break-window-sling-damaged
+         ^point weak-point)
+-->
+   (<s> ^operator <op> = 0)
+}
+
+
+sp {rp*propose-op*escape
+  (state <s> ^problem-space.name robot-problem ^phase action)
+  (<s> ^inventory ladder ^window broken)
+  -->
+  (<s> ^operator <o>)
+  (<o> ^name escape)
+}
+
+
+#Action execution
+
+# --- START OF Operations of breaking the window with the tool
+
+sp {rp*apply-op*break-window-tool-intact-generic-point
+  (state <s>  ^operator <o>)
+  (<s> ^window intact ^inventory tool ladder)
+  (<o> ^name break-window-tool-intact ^point generic-point)
+  -->
+  (write (crlf) |   Hitting intact window with tool in a generic point   |)
+  #(<s> ^window intact - damaged +)
+  (write (crlf) |   Nothing happened...                                   |)
+}
+
+sp {rp*apply-op*break-window-tool-intact-weak-point
+  (state <s>  ^operator <o>)
+  (<s> ^window intact ^inventory tool ladder)
+  (<o> ^name break-window-tool-intact ^point weak-point)
+  -->
+  (write (crlf) |   Hitting intact window with tool in the weak point   |)
+  (<s> ^window intact - damaged +)
+  (write (crlf) |   The window has been damaged                         |)
+}
+
+sp {rp*apply-op*break-window-tool-damaged-generic-point
+  (state <s>  ^operator <o>)
+  (<s> ^window damaged ^inventory tool ladder)
+  (<o> ^name break-window-tool-damaged ^point generic-point)
+  -->
+  (write (crlf) |   Hitting damaged window with tool in a generic point   |)
+  #(<s> ^window intact - damaged +)
+  (write (crlf) |   Nothing happened...                                   |)
+}
+
+sp {rp*apply-op*break-window-tool-damaged-weak-point
+  (state <s>  ^operator <o>)
+  (<s> ^window damaged ^inventory tool ladder)
+  (<o> ^name break-window-tool-damaged ^point weak-point)
+  -->
+  (write (crlf) |   Hitting damaged window with tool in the weak point   |)
+  (<s> ^window damaged - broken +)
+  (write (crlf) |   The window broke                                     |)
+}
+
+sp {rp*terminate*break-window-tool-intact
+  (state <s> ^operator <o>)
+  (<o> ^name break-window-tool-intact)
+  -->
+  (<s> ^operator <o>)
+}
+
+sp {rp*terminate*break-window-tool-damaged
+  (state <s> ^operator <o>)
+  (<o> ^name break-window-tool-damaged)
+  -->
+  (<s> ^operator <o>)
+}
+
+# --- END OF Operations of breaking the window with the tool
+
+# --- START OF Operations of breaking the window with the sling
+
+sp {rp*apply-op*break-window-sling-intact-generic
+  (state <s>  ^operator <o>)
+  (<s> ^window intact ^inventory sling rocks)
+  (<o> ^name break-window-sling-intact ^point generic-point)
+  -->
+  (write (crlf) |   Hitting intact window with pebble thrown with sling in generic point    |)
+  #(<s> ^window intact - damaged +)
+   (write (crlf) |   Nothing happened...                                                    |)
+}
+
+sp {rp*apply-op*break-window-sling-intact-weak
+  (state <s>  ^operator <o>)
+  (<s> ^window intact ^inventory sling rocks)
+  (<o> ^name break-window-sling-intact ^point weak-point)
+  -->
+  (write (crlf) |   Hitting intact window with pebble thrown with sling in a weak point    |)
+  (<s> ^window intact - damaged +)
+   (write (crlf) |   The window got damaged                                                |)
+}
+
+
+sp {rp*apply-op*break-window-sling-damaged-generic
+  (state <s>  ^operator <o>)
+  (<s> ^window damaged ^inventory sling rocks  ^point generic-point)
+  (<o> ^name break-window-sling-damaged)
+  -->
+  (write (crlf) |  Hitting damaged window with pebble thrown with a sling in generic point    |)
+  #(<s> ^window damaged - broken +)
+  (write (crlf) |   Nothing happened...                                                    |)
+  }
+
+sp {rp*apply-op*break-window-sling-damaged-weak
+  (state <s>  ^operator <o>)
+  (<s> ^window damaged ^inventory sling rocks)
+  (<o> ^name break-window-sling-damaged ^point weak-point)
+  -->
+  (write (crlf) |  Hitting damaged window with pebble thrown with a sling in weak point   |)
+  (<s> ^window damaged - broken +)
+  (write (crlf) |   The window broke                                                      |)
+  }
+
+sp {rp*terminate*break-window-sling-intact
+  (state <s> ^operator <o>)
+  (<o> ^name break-window-sling-intact)
+  -->
+  (<s> ^operator <o>)
+}
+
+sp {rp*terminate*break-window-sling-damaged
+  (state <s> ^operator <o>)
+  (<o> ^name break-window-sling-damaged)
+  -->
+  (<s> ^operator <o>)
+}
+
+# --- END OF Operations of breaking the window with the sling
+
+# --- START OF Operation escape
+
+sp {rp*apply-op*escape
+  (state <s>  ^operator <o>)
+  (<s> ^inventory ladder)
+  (<o> ^name escape)
+  -->
+  (write (crlf) |   Using ladder to escape    |)
+  (<s> ^position inside - outside +)
+}
+
+sp {rp*terminate*escape
+  (state <s> ^operator <o>)
+  (<o> ^name escape)
+  -->
+  (<s> ^operator <o> )
+}
+
+# --- END OF Operation escape
+
+
+# --- ELABORATING REWARD OF ACTIONS
+sp {elaborate*reward-actions
+   (state <s> ^problem-space.name robot-problem ^phase action
+              ^reward-link <r>
+              ^windows-hit-point <h>
+              ^operator <o>)
+   (<o> ^point <p>) 
+   (<h> ^name <p> ^reward  <d-reward>)
+-->
+   (<r> ^reward <rr>)
+   (<rr> ^value <d-reward>)
+}
+
+sp {rp*evaluate*state*success
+  (state <s>)
+  (<s> ^position outside)
+  -->
+  (<s> ^success yes)}
+
+sp {default*top-goal*halt*state*success
+    :default
+  (state <s>) 
+  (<s> ^success yes)
+  -->
+  (write (crlf)  |  Robot is outside, goal reached | )
+  (halt)
+}
