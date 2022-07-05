@@ -161,7 +161,7 @@ sp {rp*apply-op*break-window-tool-intact-generic-point
   (<o> ^name break-window-tool-intact ^point generic-point)
   -->
   (write (crlf) |   Hitting intact window with tool in a generic point   |)
-  #(<s> ^window intact - damaged +)
+  (<s> ^action useless )
   (write (crlf) |   Nothing happened...                                   |)
 }
 
@@ -181,7 +181,7 @@ sp {rp*apply-op*break-window-tool-damaged-generic-point
   (<o> ^name break-window-tool-damaged ^point generic-point)
   -->
   (write (crlf) |   Hitting damaged window with tool in a generic point   |)
-  #(<s> ^window intact - damaged +)
+  (<s> ^action useless )
   (write (crlf) |   Nothing happened...                                   |)
 }
 
@@ -219,7 +219,7 @@ sp {rp*apply-op*break-window-sling-intact-generic
   (<o> ^name break-window-sling-intact ^point generic-point)
   -->
   (write (crlf) |   Hitting intact window with pebble thrown with sling in generic point    |)
-  #(<s> ^window intact - damaged +)
+  (<s> ^action useless )
    (write (crlf) |   Nothing happened...                                                    |)
 }
 
@@ -240,7 +240,7 @@ sp {rp*apply-op*break-window-sling-damaged-generic
   (<o> ^name break-window-sling-damaged)
   -->
   (write (crlf) |  Hitting damaged window with pebble thrown with a sling in generic point    |)
-  #(<s> ^window damaged - broken +)
+  (<s> ^action useless )
   (write (crlf) |   Nothing happened...                                                    |)
   }
 
@@ -309,6 +309,13 @@ sp {rp*evaluate*state*success
   (<s> ^position outside)
   -->
   (<s> ^success yes)}
+
+sp {rp*evaluate*state*useless-action
+  (state <s>)
+  (<s> ^action useless)
+  -->
+  (write (crlf)  |  Window didn't broke can't escape | )
+  (halt)}
 
 sp {default*top-goal*halt*state*success
     :default
