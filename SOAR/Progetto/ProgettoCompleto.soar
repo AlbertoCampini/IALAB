@@ -24,14 +24,14 @@ sp {rp*propose-space*rp
   (<t1> ^name ladder ^reward 2)
   (<t2> ^name tool ^reward 1)
   (<t3> ^name sling ^reward 1)
-  (<t4> ^name log-branch ^reward -1)
-  (<t5> ^name log-spring ^reward -1)
-  (<t6> ^name log-rocks ^reward -1)
-  (<t7> ^name spring-rocks ^reward -1)
+  (<t4> ^name log-branch ^reward -3)
+  (<t5> ^name log-spring ^reward -3)
+  (<t6> ^name log-rocks ^reward -3)
+  (<t7> ^name spring-rocks ^reward -3)
 
   (<s> ^windows-hit-point <d1> <d2>)
 
-  (<d1> ^name generic-point ^reward  -1)
+  (<d1> ^name generic-point ^reward  -3)
   (<d2> ^name weak-point ^reward 1)
 
   (<p> ^name robot-problem)
@@ -633,10 +633,11 @@ sp {elaborate*reward-actions
    (<rr> ^value <d-reward>)
 }
 
-sp {rp*evaluate*state*success
+sp {rp*evaluate*state*robot-outside
   (state <s>)
   (<s> ^position outside)
   -->
+  (write (crlf)  |  Robot is outside, goal reached | )
   (<s> ^success yes)}
 
 sp {rp*evaluate*state*useless-action
@@ -644,14 +645,20 @@ sp {rp*evaluate*state*useless-action
   (<s> ^action useless)
   -->
   (write (crlf)  |  Window didn't broke can't escape | )
-  (halt)}
+  (<s> ^success no)}
   
-
 sp {default*top-goal*halt*state*success
     :default
   (state <s>) 
   (<s> ^success yes)
   -->
-  (write (crlf)  |  Robot is outside, goal reached | )
+  (halt)
+}
+
+sp {default*top-goal*halt*state*failure
+    :default
+  (state <s>) 
+  (<s> ^success no)
+  -->
   (halt)
 }

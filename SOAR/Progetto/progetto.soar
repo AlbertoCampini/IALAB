@@ -13,7 +13,7 @@ sp {rp*propose-space*rp
   (<s> ^problem-space <p>)
   (<p> ^name robot-problem-action)
   (<s> ^windows-hit-point <d1> <d2>)
-  (<d1> ^name generic-point ^reward  -1)
+  (<d1> ^name generic-point ^reward  -2)
   (<d2> ^name weak-point ^reward 1)
   (<s> ^inventory tool ladder ^window intact ^position inside)
 }
@@ -297,8 +297,8 @@ sp {elaborate*reward
               ^reward-link <r>
               ^windows-hit-point <h>
               ^operator <o>)
-   (<o> ^point <p>) 
-   (<h> ^name <p> ^reward  <d-reward>)
+   (<o> ^point <hp>) 
+   (<h> ^name <hp> ^reward  <d-reward>)
 -->
    (<r> ^reward <rr>)
    (<rr> ^value <d-reward>)
@@ -308,6 +308,7 @@ sp {rp*evaluate*state*success
   (state <s>)
   (<s> ^position outside)
   -->
+  (write (crlf)  |  Robot is outside, goal reached | )
   (<s> ^success yes)}
 
 sp {rp*evaluate*state*useless-action
@@ -315,14 +316,21 @@ sp {rp*evaluate*state*useless-action
   (<s> ^action useless)
   -->
   (write (crlf)  |  Window didn't broke can't escape | )
-  (halt)}
+  (<s> ^success no)}
 
 sp {default*top-goal*halt*state*success
     :default
   (state <s>) 
   (<s> ^success yes)
   -->
-  (write (crlf)  |  Robot is outside, goal reached | )
+  (halt)
+}
+
+sp {default*top-goal*halt*state*failure
+    :default
+  (state <s>) 
+  (<s> ^success no)
+  -->
   (halt)
 }
 
