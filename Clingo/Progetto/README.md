@@ -22,8 +22,8 @@ obbligatorie, si richiede di considerare i seguenti vincoli ulteriori, che si po
 aggiungere (tutti o alcuni) a discrezione del gruppo nel caso non rendano privo di
 soluzione il problema:
 - ciascuna squadra non deve giocare mai più di due partite consecutive in casa o
-fuori casa 🟨;
-- ci sono 4 derby (invece di 3) 🟨;
+fuori casa ✅;
+- ci sono 4 derby (invece di 3) ✅;
 - la distanza tra una coppia di gare di andata e ritorno è di almeno 10 giornate,
 ossia se SquadraA vs SquadraB è programmata per la giornata 12, il ritorno
-SquadraB vs SquadraA verrà schedulato non prima dalla giornata 22 🟨.
+SquadraB vs SquadraA verrà schedulato non prima dalla giornata 22 ✅.
